@@ -1,14 +1,53 @@
+/* ---------- Shared bits ---------- */
+.tone-violet {
+  --tone: var(--accent);
+}
+.tone-cyan {
+  --tone: var(--cyan);
+}
+.tone-yellow {
+  --tone: var(--yellow);
+}
+.home-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--tone, var(--cyan));
+  background: color-mix(
+    in srgb,
+    var(--tone, var(--accent)) 22%,
+    var(--surface)
+  );
+}
+.home-heading {
+  font-size: 1.3rem;
+  margin: 28px 0 12px;
+}
+.home-badge {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--yellow);
+  color: var(--text);
+}
+
 /* ---------- Hero (logged out) ---------- */
 .hero {
   text-align: center;
   padding: 48px 0 24px;
 }
-.hero img {
+.hero-planet {
   width: 120px;
   height: 120px;
+  animation: home-float 4s ease-in-out infinite;
 }
 .hero h1 {
-  font-size: 2.4rem;
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
   margin-top: 16px;
 }
 .hero .row {
@@ -19,31 +58,10 @@
   margin-top: 20px;
 }
 
-/* ---------- Logged in top ---------- */
-.home-top {
-  padding: 24px 0 8px;
-}
-.home-top h1 {
-  font-size: 2rem;
-}
-
-/* ---------- Quick actions ---------- */
-.home-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin: 16px 0 24px;
-}
-.home-actions .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* ---------- Cards grid ---------- */
 .home-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin: 24px 0;
 }
@@ -55,45 +73,500 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+.home-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
 }
 .home-card h2 {
   font-size: 1.1rem;
 }
-.home-card-off {
-  opacity: 0.75;
+
+/* ---------- How it works (logged out) ---------- */
+.home-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 }
-.home-icon {
-  font-size: 1.8rem;
+.home-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
-.home-big {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--text);
+.home-step h3,
+.home-step p {
+  margin: 0;
+}
+.home-step-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: var(--accent);
+  color: var(--accent-text);
 }
 
-/* ---------- Small "Coming soon" tag ---------- */
-.home-tag {
-  align-self: flex-start;
-  font-size: 0.75rem;
-  padding: 2px 10px;
+/* ---------- Logged in: two columns ---------- */
+.home-dash {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+}
+.home-main,
+.home-side {
+  min-width: 0;
+}
+.home-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- Banner + mascot ---------- */
+.home-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 30%, var(--surface)),
+    color-mix(in srgb, var(--cyan) 15%, var(--surface))
+  );
+}
+.home-banner-text h1 {
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  margin: 4px 0 10px;
+}
+.home-eyebrow {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.home-bubble {
+  display: inline-block;
+  margin: 0;
+  padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid var(--yellow);
+  font-size: 0.95rem;
   color: var(--text);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  border: 1px solid var(--border);
+}
+.home-mascot {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: none;
+  cursor: pointer;
+  animation: home-float 4s ease-in-out infinite;
+}
+.home-mascot:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+.home-mascot-img {
+  display: block;
+}
+.home-mascot-img.pop {
+  animation: home-pop 0.5s ease;
+}
+
+/* ---------- Mood check-in ---------- */
+.home-mood {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.home-mood-title,
+.home-quests-title {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+}
+.home-mood-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.home-mood-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.home-mood-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+.home-mood-btn[aria-pressed="true"] {
+  border-color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 18%, var(--surface));
+}
+.home-mood-btn:focus-visible,
+.home-tip-btn:focus-visible,
+.focus-mode:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.home-mood-reply {
+  margin: 12px 0 0;
+}
+
+/* ---------- Getting started quests ---------- */
+.home-quests {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.home-quests-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-bar {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+.home-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  transition: width 0.4s ease;
+}
+.home-quest-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.home-quest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home-quest .home-badge {
+  margin: 0 0 0 auto;
+}
+.home-check {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 800;
+  border: 2px solid var(--border);
+}
+.home-quest.is-done .home-check {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* ---------- Launch pad tiles ---------- */
+.home-tile {
+  background: var(--surface);
+  border: 1px dashed var(--tone, var(--accent));
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+.home-tile:hover {
+  transform: translateY(-4px) rotate(-1deg);
+  background: color-mix(
+    in srgb,
+    var(--tone, var(--accent)) 10%,
+    var(--surface)
+  );
+}
+.home-tile h3,
+.home-tile p {
+  margin: 0;
 }
 
 /* ---------- Your sets ---------- */
-.home-heading {
-  font-size: 1.3rem;
-  margin-bottom: 12px;
-}
 .home-empty {
   background: var(--surface);
   border: 1px dashed var(--border);
   border-radius: 16px;
-  padding: 32px 20px;
+  padding: 24px 20px;
   text-align: center;
+}
+.home-empty h3,
+.home-empty p {
+  margin: 0 0 6px;
+}
+.home-ghosts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.home-ghost {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 92px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px dashed var(--border);
+  opacity: 0.7;
+  animation: home-pulse 2.4s ease-in-out infinite;
+}
+.home-ghost:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.home-ghost:nth-child(3) {
+  animation-delay: 0.8s;
+}
+.home-ghost-line {
+  display: block;
+  width: 45%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+}
+.home-ghost-line.wide {
+  width: 75%;
+}
+
+/* ---------- Side column: progress ---------- */
+.home-side-card {
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.home-side-title {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+}
+.home-streak {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home-streak-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--yellow);
+  background: color-mix(in srgb, var(--yellow) 18%, var(--surface));
+}
+.home-streak strong {
+  font-size: 1.8rem;
+}
+.home-week {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+.home-day {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.home-day.is-today {
+  color: var(--text);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 20%, transparent);
+}
+.home-side-note {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+.home-goal {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.home-goal p {
+  margin: 0;
+}
+.home-goal-track,
+.home-goal-bar {
+  fill: none;
+  stroke-width: 7;
+}
+.home-goal-track {
+  stroke: var(--border);
+}
+.home-goal-bar {
+  stroke: var(--cyan);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+.home-mini-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.home-mini-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.home-mini-stat strong {
+  font-size: 1.3rem;
+}
+
+/* ---------- Tip of the day ---------- */
+.home-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--yellow);
+}
+.home-tip h3,
+.home-tip p {
+  margin: 0;
+}
+.home-icon-tip {
+  color: var(--yellow);
+  background: color-mix(in srgb, var(--yellow) 18%, var(--surface));
+}
+.home-tip-btn {
+  margin-top: 8px;
+  padding: 4px 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--cyan);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.home-tip-btn:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Motion ---------- */
+@keyframes home-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes home-pop {
+  0% {
+    transform: scale(1) rotate(0);
+  }
+  40% {
+    transform: scale(1.18) rotate(-8deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes home-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-planet,
+  .home-mascot,
+  .home-mascot-img.pop,
+  .home-ghost {
+    animation: none;
+  }
+  .home-card,
+  .home-tile,
+  .home-mood-btn,
+  .home-bar-fill {
+    transition: none;
+  }
+  .home-tile:hover,
+  .home-mood-btn:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Small screens: one column ---------- */
+@media (max-width: 820px) {
+  .home-dash {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .home-banner {
+    padding: 18px;
+  }
+  .home-mascot-img {
+    width: 64px;
+    height: 64px;
+  }
 }

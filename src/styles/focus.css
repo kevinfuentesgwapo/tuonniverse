@@ -1,0 +1,86 @@
+.focus {
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.focus .home-side-title {
+  text-align: left;
+}
+
+/* ---------- Mode switch ---------- */
+.focus-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.focus-mode {
+  min-height: 40px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.focus-mode[aria-pressed="true"] {
+  border-color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 18%, var(--surface));
+}
+
+/* ---------- Ring ---------- */
+.focus-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 16px auto 8px;
+  width: 140px;
+  height: 140px;
+}
+.focus-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.focus-track,
+.focus-bar {
+  fill: none;
+  stroke-width: 8;
+}
+.focus-track {
+  stroke: var(--border);
+}
+.focus-bar {
+  stroke: var(--cyan);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s linear;
+}
+.focus-ring-break .focus-bar {
+  stroke: var(--yellow);
+}
+.focus-time {
+  position: relative;
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Message + buttons ---------- */
+.focus-message {
+  min-height: 2.6em;
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+.focus-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-bar {
+    transition: none;
+  }
+}

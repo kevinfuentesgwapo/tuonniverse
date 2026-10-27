@@ -5,5 +5,9 @@
 @import "./navbar.css";
 @import "./logo.css";
 @import "./home.css";
+@import "./focus.css";
+@import "./notfound.css";
 @import "./forms.css";
 @import "./auth.css";
+@import "./shell.css";
+@import "./privacy.css";

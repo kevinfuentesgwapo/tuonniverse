@@ -1,31 +1,60 @@
 import { Routes, Route } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
+import AppShell from "./components/layout/AppShell";
 import useTheme from "./hooks/useTheme";
-import { useLocation } from "react-router-dom";
+import useAuth from "./hooks/useAuth";
 
-// Pages that have their own full-screen look (no Navbar).
-const NO_NAVBAR = ["/login", "/reset-password"];
+// Picks the frame around the page.
+// Logged in = app shell (sidebar + top bar).
+// Logged out = simple Navbar.
+function Layout({ theme, onToggleTheme }) {
+  const { user, loading } = useAuth();
 
-export default function App() {
-  const { theme, toggleTheme } = useTheme();
-  const { pathname } = useLocation();
-  const showNavbar = !NO_NAVBAR.includes(pathname);
+  if (loading) {
+    return (
+      <main className="page">
+        <p className="muted">Loading…</p>
+      </main>
+    );
+  }
+
+  if (user) {
+    return <AppShell theme={theme} onToggleTheme={onToggleTheme} />;
+  }
 
   return (
     <>
-      {showNavbar && <Navbar theme={theme} onToggleTheme={toggleTheme} />}
-      <Routes>
+      <Navbar theme={theme} onToggleTheme={onToggleTheme} />
+      <Outlet />
+    </>
+  );
+}
+
+export default function App() {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <Routes>
+      {/* Full-screen pages. No navbar, no sidebar. */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Pages inside the frame. */}
+      <Route element={<Layout theme={theme} onToggleTheme={toggleTheme} />}>
         {/* Home is public. It shows a different view when logged in. */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        {/* Any other address shows the 404 page. */}
+        {/* Privacy is public. Anyone can read it. */}
+        <Route path="/privacy" element={<Privacy />} />
+        {/* Private pages (sets, notes, study) go here later,
+            wrapped in ProtectedRoute. */}
         <Route path="*" element={<NotFound />} />
-      </Routes>
-    </>
+      </Route>
+    </Routes>
   );
 }
