@@ -1,25 +1,14 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
-import ProtectedRoute from "./components/layout/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
-import useAuth from "./hooks/useAuth";
 import useTheme from "./hooks/useTheme";
+import { useLocation } from "react-router-dom";
 
 // Pages that have their own full-screen look (no Navbar).
 const NO_NAVBAR = ["/login", "/reset-password"];
-
-// TEMPORARY page. We replace it later.
-function TempHome() {
-  const { user } = useAuth();
-
-  return (
-    <main className="page">
-      <h1>You are logged in 🎉</h1>
-      <p className="muted">Signed in as {user.email}</p>
-    </main>
-  );
-}
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
@@ -30,17 +19,12 @@ export default function App() {
     <>
       {showNavbar && <Navbar theme={theme} onToggleTheme={toggleTheme} />}
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <TempHome />
-            </ProtectedRoute>
-          }
-        />
+        {/* Home is public. It shows a different view when logged in. */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Any other address shows the 404 page. */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

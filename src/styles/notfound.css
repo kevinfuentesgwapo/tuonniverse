@@ -1,0 +1,46 @@
+.notfound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding-top: 64px;
+}
+
+.notfound-planet {
+  animation: notfound-float 4s ease-in-out infinite;
+}
+
+.notfound-code {
+  margin: 0;
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--cyan);
+}
+
+.notfound h1 {
+  margin: 0;
+  color: var(--text);
+}
+
+.notfound .muted {
+  max-width: 420px;
+  margin: 0 0 8px;
+}
+
+@keyframes notfound-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notfound-planet {
+    animation: none;
+  }
+}
