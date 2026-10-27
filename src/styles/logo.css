@@ -1,0 +1,33 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 1.3rem;
+}
+.logo-lg {
+  font-size: 1.9rem;
+}
+
+.logo-mark {
+  width: 1.9em;
+  height: 1.9em;
+  flex: none;
+  border-radius: 22%;
+  transition: transform 0.3s ease;
+}
+.logo:hover .logo-mark {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-mark {
+    transition: none;
+  }
+  .logo:hover .logo-mark {
+    transform: none;
+  }
+}

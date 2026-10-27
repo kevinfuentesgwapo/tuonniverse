@@ -1,0 +1,67 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image: radial-gradient(
+    circle at 85% -10%,
+    rgba(124, 92, 255, 0.25),
+    transparent 50%
+  );
+  background-attachment: fixed;
+}
+
+/* a few tiny stars, only in dark mode */
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(
+      1.5px 1.5px at 20% 30%,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    ),
+    radial-gradient(
+      1.5px 1.5px at 70% 20%,
+      rgba(255, 255, 255, 0.45),
+      transparent
+    ),
+    radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(
+      1.5px 1.5px at 85% 65%,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    ),
+    radial-gradient(
+      circle at 85% -10%,
+      rgba(124, 92, 255, 0.25),
+      transparent 50%
+    );
+}
+
+a {
+  color: inherit;
+}
+:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+.page h1 {
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+.muted {
+  color: var(--muted);
+}

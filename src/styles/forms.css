@@ -1,0 +1,132 @@
+.form-page {
+  max-width: 420px;
+}
+.form {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0;
+}
+.form label {
+  font-weight: 600;
+  margin-top: 6px;
+}
+.form input {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.form input:focus-visible {
+  border-color: var(--accent);
+}
+.form .btn {
+  margin-top: 12px;
+}
+.form .btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.form-error {
+  color: #ff7a66;
+  margin: 4px 0;
+}
+.form-message {
+  color: var(--cyan);
+  margin: 4px 0;
+}
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--cyan);
+  text-decoration: underline;
+}
+.oauth-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: #1f1f1f;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 999px;
+}
+.oauth-btn:hover {
+  background: #f4f6fb;
+}
+.oauth-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.oauth-facebook {
+  background: #1877f2;
+  color: #ffffff;
+  border-color: #1877f2;
+}
+.oauth-facebook:hover {
+  background: #1465d0;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 4px;
+  color: var(--muted);
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.terms {
+  font-size: 0.85rem;
+  margin-top: 24px;
+}
+.password-wrap {
+  position: relative;
+}
+.password-wrap input {
+  width: 100%;
+  padding-right: 76px;
+}
+.show-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: 0;
+  padding: 6px 10px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: var(--cyan);
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+.forgot-row {
+  text-align: right;
+}

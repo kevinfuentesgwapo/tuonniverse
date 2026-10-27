@@ -1,0 +1,27 @@
+/* Brand colors. Dark is the default look. */
+:root,
+[data-theme="dark"] {
+  --bg: #0b1430;
+  --surface: #13204a;
+  --text: #eef1ff;
+  --muted: #a5b0d6;
+  --border: #26346b;
+  --accent: #7c5cff;
+  --accent-text: #ffffff;
+  --cyan: #4fd1c5;
+  --yellow: #ffd166;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f5f6ff;
+  --surface: #ffffff;
+  --text: #0f1b3d;
+  --muted: #55618a;
+  --border: #dde1f5;
+  --accent: #5b3fe0;
+  --accent-text: #ffffff;
+  --cyan: #1a9e93;
+  --yellow: #b7860b;
+  color-scheme: light;
+}
