@@ -11,6 +11,7 @@ import QuizStudy from "./pages/QuizStudy";
 import WriteStudy from "./pages/WriteStudy";
 import Notes from "./pages/Notes";
 import NoteEditor from "./pages/NoteEditor";
+import AiCards from "./pages/AiCards";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import AppShell from "./components/layout/AppShell";
@@ -141,6 +142,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <NoteEditor />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ai"
+          element={
+            <ProtectedRoute>
+              <AiCards />
             </ProtectedRoute>
           }
         />

@@ -11,7 +11,7 @@ import { supabase } from "../../lib/supabase";
 const CREATE_ITEMS = [
   { label: "New set", icon: "sets", to: "/sets/new" },
   { label: "New note", icon: "notes", to: "/notes/new" },
-  { label: "Generate with AI", icon: "sparkles" },
+  { label: "Generate with AI", icon: "sparkles", to: "/ai" },
 ];
 
 function getDisplayName(user) {
