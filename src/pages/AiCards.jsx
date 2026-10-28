@@ -1,17 +1,20 @@
-// /ai : paste text, Tuo makes cards, you check them.
-// Saving the cards into a set comes in the next step.
+// /ai : paste text, Tuo makes cards, you check them, then save them as a set.
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useAiUsage from "../hooks/useAiUsage";
+import { createSet } from "../hooks/useSets";
 import { generateCardsFromText } from "../lib/api";
 import CardPreview, { addIds } from "../components/ai/CardPreview";
 import GenerateCardsButton from "../components/ai/GenerateCardsButton";
 
 const MIN_CHARS = 50;
 const MAX_CHARS = 20000;
+const MAX_TITLE = 100;
 
 export default function AiCards() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const usage = useAiUsage(user?.id);
 
   const [text, setText] = useState("");
@@ -20,12 +23,22 @@ export default function AiCards() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [madeAt, setMadeAt] = useState(0);
+  const [title, setTitle] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const resultRef = useRef(null);
 
   const length = text.trim().length;
   const tooLong = length > MAX_CHARS;
   const noTries = !usage.loading && usage.left <= 0;
   const canMake = length >= MIN_CHARS && !tooLong && !noTries;
+
+  // Only cards with both sides filled can be saved.
+  const goodCards = cards.filter(
+    (c) => String(c.front || "").trim() && String(c.back || "").trim(),
+  );
+  const skipped = cards.length - goodCards.length;
+  const canSave = title.trim().length > 0 && goodCards.length > 0 && !saving;
 
   // After new cards arrive, bring them into view.
   useEffect(() => {
@@ -35,6 +48,7 @@ export default function AiCards() {
   async function handleMake() {
     setError("");
     setNotice("");
+    setSaveError("");
     setBusy(true);
     try {
       const result = await generateCardsFromText(text.trim());
@@ -60,8 +74,34 @@ export default function AiCards() {
   function handleClear() {
     setText("");
     setCards([]);
+    setTitle("");
     setError("");
     setNotice("");
+    setSaveError("");
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    if (!canSave || !user) return;
+    setSaveError("");
+    setSaving(true);
+    try {
+      const setId = await createSet({
+        userId: user.id,
+        title: title.trim(),
+        description: "",
+        cards: goodCards.map((c) => ({
+          term: String(c.front).trim(),
+          definition: String(c.back).trim(),
+        })),
+      });
+      navigate(`/sets/${setId}`);
+    } catch {
+      setSaveError(
+        "We could not save your set right now. Your cards are still here. Please try again.",
+      );
+      setSaving(false);
+    }
   }
 
   return (
@@ -84,7 +124,7 @@ export default function AiCards() {
           id="ai-text"
           rows={9}
           value={text}
-          disabled={busy}
+          disabled={busy || saving}
           placeholder="Paste a chapter, a list of terms, or your class notes here."
           onChange={(e) => setText(e.target.value)}
         />
@@ -128,7 +168,7 @@ export default function AiCards() {
           <GenerateCardsButton
             onClick={handleMake}
             busy={busy}
-            disabled={!canMake}
+            disabled={!canMake || saving}
             hasCards={cards.length > 0}
           />
           {(text || cards.length > 0) && (
@@ -136,7 +176,7 @@ export default function AiCards() {
               type="button"
               className="btn"
               onClick={handleClear}
-              disabled={busy}
+              disabled={busy || saving}
             >
               Clear
             </button>
@@ -146,7 +186,58 @@ export default function AiCards() {
 
       {cards.length > 0 && (
         <div className="ai-result" ref={resultRef}>
-          <CardPreview cards={cards} onChange={setCards} disabled={busy} />
+          <CardPreview
+            cards={cards}
+            onChange={setCards}
+            disabled={busy || saving}
+          />
+
+          <form className="ai-save" onSubmit={handleSave}>
+            <h2 className="ai-save-title">Save as a set</h2>
+            <label className="ai-paste-label" htmlFor="ai-set-title">
+              Set name
+            </label>
+            <input
+              id="ai-set-title"
+              className="ai-save-input"
+              type="text"
+              value={title}
+              maxLength={MAX_TITLE}
+              disabled={saving}
+              placeholder="Example: Web basics"
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            {skipped > 0 && (
+              <p className="ai-note">
+                {skipped === 1
+                  ? "1 card has an empty side, so we will skip it."
+                  : `${skipped} cards have an empty side, so we will skip them.`}
+              </p>
+            )}
+            {saveError && (
+              <p className="ai-error" role="alert">
+                {saveError}
+              </p>
+            )}
+
+            <div className="ai-actions">
+              <button
+                type="submit"
+                className="btn btn-primary ai-save-btn"
+                disabled={!canSave}
+              >
+                {saving
+                  ? "Saving…"
+                  : `Save ${goodCards.length} ${
+                      goodCards.length === 1 ? "card" : "cards"
+                    } as a set`}
+              </button>
+            </div>
+            {!title.trim() && goodCards.length > 0 && (
+              <p className="muted">Give your set a name, then save.</p>
+            )}
+          </form>
         </div>
       )}
     </main>

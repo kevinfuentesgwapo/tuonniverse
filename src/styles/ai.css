@@ -204,3 +204,48 @@
     animation: home-pop 0.4s ease-out;
   }
 }
+
+/* ---------- AI page: save as a set ---------- */
+.ai-result {
+  display: grid;
+  gap: 20px;
+}
+
+.ai-save {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.ai-save-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.ai-save-input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 10px 14px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+}
+.ai-save-input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ai-save-btn {
+  min-height: 48px;
+}
+
+.ai-save .muted {
+  margin: 0;
+}
