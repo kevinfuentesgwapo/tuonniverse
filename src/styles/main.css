@@ -1,6 +1,8 @@
-/* The order matters. Colors first, then basics, then pieces. */
+/* The order matters. Colors first, then basics, then pieces.
+   sparkle.css must stay LAST. */
 @import "./variables.css";
 @import "./base.css";
+@import "./backdrop.css";
 @import "./buttons.css";
 @import "./navbar.css";
 @import "./logo.css";
@@ -11,3 +13,5 @@
 @import "./auth.css";
 @import "./shell.css";
 @import "./privacy.css";
+@import "./sets.css";
+@import "./sparkle.css";

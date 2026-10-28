@@ -17,6 +17,7 @@
   height: 1.9em;
   flex: none;
   border-radius: 22%;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 40%, transparent);
   transition: transform 0.3s ease;
 }
 .logo:hover .logo-mark {

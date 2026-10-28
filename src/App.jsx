@@ -1,12 +1,13 @@
-import { Routes, Route } from "react-router-dom";
-import { Outlet } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Privacy from "./pages/Privacy";
+import SetEditor from "./pages/SetEditor";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import AppShell from "./components/layout/AppShell";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
 import useTheme from "./hooks/useTheme";
 import useAuth from "./hooks/useAuth";
 
@@ -47,12 +48,20 @@ export default function App() {
 
       {/* Pages inside the frame. */}
       <Route element={<Layout theme={theme} onToggleTheme={toggleTheme} />}>
-        {/* Home is public. It shows a different view when logged in. */}
+        {/* Public pages. */}
         <Route path="/" element={<Home />} />
-        {/* Privacy is public. Anyone can read it. */}
         <Route path="/privacy" element={<Privacy />} />
-        {/* Private pages (sets, notes, study) go here later,
-            wrapped in ProtectedRoute. */}
+
+        {/* Private pages. Logged-out visitors are sent to /login. */}
+        <Route
+          path="/sets/new"
+          element={
+            <ProtectedRoute>
+              <SetEditor />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

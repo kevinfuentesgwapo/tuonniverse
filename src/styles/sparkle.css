@@ -1,0 +1,140 @@
+/* SPARKLE DECOR
+   Tiny sparkles and dots inside the cards and the sidebar.
+   They sit in a corner and fade toward the text, so words stay clear.
+   Colors come from theme variables, so it works in dark and light.
+   IMPORTANT: keep this file LAST in main.css, so it wins. */
+
+:root,
+[data-theme="dark"] {
+  --deco-dot: color-mix(in srgb, var(--accent) 26%, transparent);
+  --deco-dot-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --deco-sparkles: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E %3Cg fill='%23ffd970' fill-opacity='.55'%3E %3Cpath transform='translate(30 28) scale(.5)' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E %3Cpath transform='translate(112 62) scale(.8)' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E %3Cpath transform='translate(62 112) scale(.4)' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E %3Ccircle cx='92' cy='20' r='1.8'/%3E%3Ccircle cx='136' cy='124' r='1.8'/%3E %3Ccircle cx='14' cy='82' r='1.6'/%3E%3Ccircle cx='124' cy='10' r='1.6'/%3E %3C/g%3E%3C/svg%3E");
+  --deco-spark-one: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-16 -16 32 32'%3E %3Cpath fill='%23ffd970' fill-opacity='.9' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E%3C/svg%3E");
+}
+[data-theme="light"] {
+  --deco-dot: color-mix(in srgb, var(--accent) 60%, transparent);
+  --deco-dot-soft: color-mix(in srgb, var(--accent) 38%, transparent);
+  --deco-sparkles: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E %3Cg fill='%23ffb300' fill-opacity='.75'%3E %3Cpath transform='translate(30 28) scale(.5)' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E %3Cpath transform='translate(112 62) scale(.8)' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E %3Cpath transform='translate(62 112) scale(.4)' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E %3Ccircle cx='92' cy='20' r='1.8'/%3E%3Ccircle cx='136' cy='124' r='1.8'/%3E %3Ccircle cx='14' cy='82' r='1.6'/%3E%3Ccircle cx='124' cy='10' r='1.6'/%3E %3C/g%3E%3C/svg%3E");
+  --deco-spark-one: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='-16 -16 32 32'%3E %3Cpath fill='%23e69a00' fill-opacity='.95' d='M0-14Q0 0 14 0Q0 0 0 14Q0 0-14 0Q0 0 0-14Z'/%3E%3C/svg%3E");
+}
+
+/* ---------- Cards: corner sparkles + dots, fading toward the text ---------- */
+.home-card,
+.home-step,
+.home-continue,
+.home-mood,
+.home-quests,
+.home-empty,
+.home-side-card,
+.home-tip,
+.focus,
+.privacy-card,
+.privacy-promise,
+.set-panel,
+.set-row,
+.set-success,
+.auth-card {
+  background-image:
+    linear-gradient(225deg, transparent 0%, var(--surface) 60%),
+    var(--deco-sparkles),
+    radial-gradient(circle, var(--deco-dot) 1.3px, transparent 1.8px);
+  background-size:
+    100% 100%,
+    150px 150px,
+    20px 20px;
+  background-position:
+    0 0,
+    top right,
+    top right;
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+/* Launch pad tiles: keep the sparkles on hover too */
+.home-tile {
+  background-image:
+    linear-gradient(225deg, transparent 0%, var(--surface) 60%),
+    var(--deco-sparkles),
+    radial-gradient(circle, var(--deco-dot) 1.3px, transparent 1.8px);
+  background-size:
+    100% 100%,
+    150px 150px,
+    20px 20px;
+  background-position:
+    0 0,
+    top right,
+    top right;
+  background-repeat: no-repeat, repeat, repeat;
+}
+.home-tile:hover {
+  background-image:
+    linear-gradient(
+      225deg,
+      transparent 0%,
+      color-mix(in srgb, var(--tone, var(--accent)) 10%, var(--surface)) 60%
+    ),
+    var(--deco-sparkles),
+    radial-gradient(circle, var(--deco-dot) 1.3px, transparent 1.8px);
+}
+
+/* Banners keep their gradient, with soft sparkles on top */
+.home-banner,
+.privacy-hero {
+  background-image:
+    var(--deco-sparkles),
+    radial-gradient(circle, var(--deco-dot-soft) 1.3px, transparent 1.8px),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 30%, var(--surface)),
+      color-mix(in srgb, var(--cyan) 15%, var(--surface))
+    );
+  background-size:
+    150px 150px,
+    22px 22px,
+    100% 100%;
+  background-position:
+    0 0,
+    0 0,
+    0 0;
+  background-repeat: repeat, repeat, no-repeat;
+}
+
+/* ---------- Sidebar: a little star corner at the bottom ---------- */
+.sidebar {
+  background-image:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface) 55%, var(--bg)) 40%,
+      transparent 100%
+    ),
+    var(--deco-sparkles),
+    radial-gradient(circle, var(--deco-dot) 1.3px, transparent 1.8px);
+  background-size:
+    100% 100%,
+    150px 150px,
+    20px 20px;
+  background-position:
+    0 0,
+    center bottom,
+    center bottom;
+  background-repeat: no-repeat, repeat, repeat;
+}
+
+/* A tiny sparkle on the page you are on */
+.sidebar-link.active {
+  background-image: var(--deco-spark-one);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
+}
+
+/* Icon-only sidebar and phone tab bar: keep it clean */
+@media (max-width: 1000px) {
+  .sidebar-link.active {
+    background-image: none;
+  }
+}
+@media (max-width: 700px) {
+  .sidebar {
+    background-image: none;
+  }
+}

@@ -8,7 +8,7 @@ import { supabase } from "../../lib/supabase";
 // Items in the Create menu.
 // When a tool is built, add  to: "/the-page"  and it becomes a real link.
 const CREATE_ITEMS = [
-  { label: "New set", icon: "sets" },
+  { label: "New set", icon: "sets", to: "/sets/new" },
   { label: "New note", icon: "notes" },
   { label: "Generate with AI", icon: "sparkles" },
 ];
@@ -174,4 +174,3 @@ export default function Topbar({ theme, onToggleTheme }) {
     </header>
   );
 }
- 

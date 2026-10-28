@@ -52,14 +52,15 @@
 }
 .sidebar-link:hover {
   color: var(--text);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 .sidebar-link.active {
   color: var(--text);
-  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: inset 4px 0 0 var(--accent);
 }
 .sidebar-link.active .icon {
-  color: var(--cyan);
+  color: var(--accent-strong);
 }
 
 /* ---------- Top bar ---------- */
@@ -142,7 +143,7 @@
   border-radius: 50%;
 }
 .avatar-btn:hover {
-  border-color: var(--cyan);
+  border-color: var(--text);
 }
 
 /* ---------- Dropdown menus ---------- */
@@ -186,7 +187,7 @@
   border-radius: 10px;
 }
 .menu-item:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 .menu-item:disabled {
   color: var(--muted);
@@ -256,6 +257,9 @@
     padding: 6px 14px;
     font-size: 0.72rem;
   }
+  .sidebar-link.active {
+    box-shadow: inset 0 3px 0 var(--accent);
+  }
   .sidebar-label {
     display: block;
   }
@@ -273,6 +277,14 @@
   .shell-content {
     padding: 16px 12px 96px;
   }
+}
+
+/* ---------- Color bridge for Home tiles ----------
+   Home tiles use --accent for "violet". Accent is yellow now,
+   so this keeps the violet tiles violet. (Clean up when we
+   next touch home.css.) */
+.tone-violet {
+  --tone: var(--violet);
 }
 
 @media (prefers-reduced-motion: reduce) {

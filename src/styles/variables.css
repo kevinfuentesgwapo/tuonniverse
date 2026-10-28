@@ -1,27 +1,35 @@
-/* Brand colors. Dark is the default look. */
+/* Brand colors. Yellow first. Dark (warm plum night) is the default look.
+   --accent        = main color (buttons, highlights)
+   --accent-text   = text that sits ON the main color (dark ink, easy to read)
+   --accent-strong = yellow/amber used for TEXT (bright in dark, deep in light)
+   --violet, --cyan, --yellow = small helper colors */
 :root,
 [data-theme="dark"] {
-  --bg: #0b1430;
-  --surface: #13204a;
-  --text: #eef1ff;
-  --muted: #a5b0d6;
-  --border: #26346b;
-  --accent: #7c5cff;
-  --accent-text: #ffffff;
+  --bg: #1a1226;
+  --surface: #261a3a;
+  --text: #fff4dc;
+  --muted: #c2b3d9;
+  --border: #3e2e5a;
+  --accent: #ffc94d;
+  --accent-text: #1a1226;
+  --accent-strong: #ffd970;
+  --violet: #a78bff;
   --cyan: #4fd1c5;
   --yellow: #ffd166;
   color-scheme: dark;
 }
 
 [data-theme="light"] {
-  --bg: #f5f6ff;
+  --bg: #fff8e6;
   --surface: #ffffff;
-  --text: #0f1b3d;
-  --muted: #55618a;
-  --border: #dde1f5;
-  --accent: #5b3fe0;
-  --accent-text: #ffffff;
-  --cyan: #1a9e93;
-  --yellow: #b7860b;
+  --text: #2a1b3d;
+  --muted: #6a5880;
+  --border: #eedfb8;
+  --accent: #ffc93c;
+  --accent-text: #2a1b3d;
+  --accent-strong: #b86a00;
+  --violet: #6b4ee0;
+  --cyan: #0f8f84;
+  --yellow: #9a6200;
   color-scheme: light;
 }

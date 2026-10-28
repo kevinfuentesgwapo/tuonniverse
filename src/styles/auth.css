@@ -27,7 +27,7 @@
   line-height: 1.1;
 }
 .auth-hero h2 .gradient-text {
-  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  background: linear-gradient(90deg, var(--accent-strong), var(--violet));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -63,7 +63,7 @@
   font-weight: 700;
   border-radius: 16px;
   backface-visibility: hidden;
-  box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 28%, transparent);
 }
 .flip-front {
   background: var(--surface);
@@ -71,7 +71,7 @@
   color: var(--text);
 }
 .flip-back {
-  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  background: linear-gradient(135deg, var(--accent), var(--yellow));
   color: var(--accent-text);
   transform: rotateY(180deg);
   font-size: 1.3rem;
@@ -110,7 +110,7 @@
 }
 .chip:hover {
   transform: translateY(-2px);
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 /* ===== Right side: card ===== */
@@ -124,14 +124,14 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
-  box-shadow: 0 20px 50px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--accent) 24%, transparent);
 }
 .auth-card::before {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--accent), var(--cyan), var(--yellow));
+  background: linear-gradient(90deg, var(--accent), var(--violet), var(--cyan));
 }
 .auth-emoji {
   display: inline-block;
@@ -164,7 +164,7 @@
 }
 .auth-card .form input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .auth-card .btn-primary {
   transition:
@@ -173,7 +173,7 @@
 }
 .auth-card .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .auth-card .oauth-btn {
   transition: transform 0.15s ease;

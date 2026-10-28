@@ -9,12 +9,41 @@
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    border-color 0.12s ease;
 }
 .btn:hover {
   border-color: var(--accent);
 }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Main button: sunny yellow with dark ink text, a little "pressable" */
 .btn-primary {
   background: var(--accent);
   color: var(--accent-text);
   border-color: var(--accent);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--accent) 55%, black);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 55%, black);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-primary:active:not(:disabled) {
+    transform: none;
+  }
 }
