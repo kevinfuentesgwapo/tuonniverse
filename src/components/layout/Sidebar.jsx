@@ -6,7 +6,7 @@ import Icon from "../ui/Icon";
 // When a page is finished, change its built to true. That's all.
 const ITEMS = [
   { to: "/", label: "Home", icon: "home", built: true },
-  { to: "/sets", label: "Sets", icon: "sets", built: false },
+  { to: "/sets", label: "Sets", icon: "sets", built: true },
   { to: "/notes", label: "Notes", icon: "notes", built: false },
   { to: "/study", label: "Study", icon: "study", built: false },
 ];

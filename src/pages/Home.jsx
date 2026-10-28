@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import useSets from "../hooks/useSets";
 import Icon from "../components/ui/Icon";
+import SetTile from "../components/flashcards/SetTile";
 import FocusTimer from "../components/home/FocusTimer";
 
 // Three cards for visitors who are not logged in.
@@ -42,13 +44,14 @@ const STEPS = [
   },
 ];
 
-// Tools we will build. They get a real link when each one is ready.
+// Tools. A tool with  to: "/page"  is a real link. The rest say "Opening soon".
 const LAUNCH_PAD = [
   {
     icon: "sets",
     tone: "violet",
     title: "New set",
     text: "Make flashcards with a term and a definition.",
+    to: "/sets/new",
   },
   {
     icon: "notes",
@@ -64,8 +67,8 @@ const LAUNCH_PAD = [
   },
 ];
 
-// Getting started quests. Only "Join" is true today. The rest turn
-// on when the tool is built and we can really check them.
+// Getting started quests. "set" turns green by itself when you have a set.
+// The others turn on when the tool is built and we can really check them.
 const QUESTS = [
   { id: "join", text: "Join Tuoniverse", done: true },
   { id: "set", text: "Make your first set", done: false },
@@ -197,9 +200,14 @@ function LoggedOutHome() {
 }
 
 // What a logged-in student sees. Two columns on big screens.
-// Tools turn from "Opening soon" into real links when they are built.
 function LoggedInHome({ user }) {
   const name = getFirstName(user);
+  const {
+    sets,
+    loading: setsLoading,
+    error: setsError,
+    totalCards,
+  } = useSets();
   const [taps, setTaps] = useState(0);
   const [mood, setMood] = useState(null);
   const [tipIndex, setTipIndex] = useState(new Date().getDate() % TIPS.length);
@@ -208,8 +216,11 @@ function LoggedInHome({ user }) {
     taps === 0 ? INTRO_LINE : MASCOT_LINES[(taps - 1) % MASCOT_LINES.length];
   const moodReply = MOODS.find((item) => item.id === mood)?.reply;
 
-  const doneCount = QUESTS.filter((quest) => quest.done).length;
-  const percent = Math.round((doneCount / QUESTS.length) * 100);
+  const quests = QUESTS.map((quest) =>
+    quest.id === "set" ? { ...quest, done: sets.length > 0 } : quest,
+  );
+  const doneCount = quests.filter((quest) => quest.done).length;
+  const percent = Math.round((doneCount / quests.length) * 100);
 
   // Monday is the first dot. getDay() gives Sunday = 0.
   const todayIndex = (new Date().getDay() + 6) % 7;
@@ -268,7 +279,7 @@ function LoggedInHome({ user }) {
           <div className="home-quests-head">
             <h2 className="home-quests-title">Getting started</h2>
             <span className="muted">
-              {doneCount} of {QUESTS.length} done
+              {doneCount} of {quests.length} done
             </span>
           </div>
           <div
@@ -282,7 +293,7 @@ function LoggedInHome({ user }) {
             <span className="home-bar-fill" style={{ width: `${percent}%` }} />
           </div>
           <ul className="home-quest-list">
-            {QUESTS.map((quest) => (
+            {quests.map((quest) => (
               <li
                 key={quest.id}
                 className={quest.done ? "home-quest is-done" : "home-quest"}
@@ -291,7 +302,14 @@ function LoggedInHome({ user }) {
                   {quest.done ? "✓" : ""}
                 </span>
                 <span>{quest.text}</span>
-                {!quest.done && <span className="home-badge">Soon</span>}
+                {!quest.done && quest.id !== "set" && (
+                  <span className="home-badge">Soon</span>
+                )}
+                {!quest.done && quest.id === "set" && (
+                  <Link to="/sets/new" className="home-go">
+                    Start
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -300,38 +318,88 @@ function LoggedInHome({ user }) {
         <section aria-label="Launch pad">
           <h2 className="home-heading">Launch pad</h2>
           <div className="home-grid">
-            {LAUNCH_PAD.map((tool) => (
-              <article
-                key={tool.title}
-                className={`home-tile tone-${tool.tone}`}
-              >
-                <span className="home-icon" aria-hidden="true">
-                  <Icon name={tool.icon} size={24} />
-                </span>
-                <h3>{tool.title}</h3>
-                <p className="muted">{tool.text}</p>
-                <span className="home-badge">Opening soon</span>
-              </article>
-            ))}
+            {LAUNCH_PAD.map((tool) => {
+              const inside = (
+                <>
+                  <span className="home-icon" aria-hidden="true">
+                    <Icon name={tool.icon} size={24} />
+                  </span>
+                  <h3>{tool.title}</h3>
+                  <p className="muted">{tool.text}</p>
+                  {tool.to ? (
+                    <span className="home-go">Open →</span>
+                  ) : (
+                    <span className="home-badge">Opening soon</span>
+                  )}
+                </>
+              );
+
+              return tool.to ? (
+                <Link
+                  key={tool.title}
+                  to={tool.to}
+                  className={`home-tile is-link tone-${tool.tone}`}
+                >
+                  {inside}
+                </Link>
+              ) : (
+                <article
+                  key={tool.title}
+                  className={`home-tile tone-${tool.tone}`}
+                >
+                  {inside}
+                </article>
+              );
+            })}
           </div>
         </section>
 
         <section aria-label="Your sets">
-          <h2 className="home-heading">Your sets</h2>
-          <div className="home-empty">
-            <h3>Your first set is waiting</h3>
-            <p className="muted">
-              When you make a set, it will land here. Get ready for liftoff!
+          <div className="home-sets-head">
+            <h2 className="home-heading">Your sets</h2>
+            {sets.length > 0 && (
+              <Link to="/sets" className="home-see-all">
+                See all
+              </Link>
+            )}
+          </div>
+
+          {setsLoading ? (
+            <p className="muted" aria-live="polite">
+              Loading your sets…
             </p>
-            <div className="home-ghosts" aria-hidden="true">
-              {[0, 1, 2].map((slot) => (
-                <div key={slot} className="home-ghost">
-                  <span className="home-ghost-line wide" />
-                  <span className="home-ghost-line" />
-                </div>
+          ) : setsError ? (
+            <div className="home-empty">
+              <h3>Hmm, your sets did not load</h3>
+              <p className="muted">
+                Check your internet and refresh the page. Your sets are safe.
+              </p>
+            </div>
+          ) : sets.length === 0 ? (
+            <div className="home-empty">
+              <h3>Your first set is waiting</h3>
+              <p className="muted">
+                When you make a set, it will land here. Get ready for liftoff!
+              </p>
+              <Link to="/sets/new" className="btn btn-primary">
+                Make my first set
+              </Link>
+              <div className="home-ghosts" aria-hidden="true">
+                {[0, 1, 2].map((slot) => (
+                  <div key={slot} className="home-ghost">
+                    <span className="home-ghost-line wide" />
+                    <span className="home-ghost-line" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="set-grid">
+              {sets.slice(0, 3).map((set) => (
+                <SetTile key={set.id} set={set} />
               ))}
             </div>
-          </div>
+          )}
         </section>
       </div>
 
@@ -391,11 +459,11 @@ function LoggedInHome({ user }) {
 
           <div className="home-mini-stats">
             <div className="home-mini-stat">
-              <strong>0</strong>
+              <strong>{sets.length}</strong>
               <span className="muted">Sets</span>
             </div>
             <div className="home-mini-stat">
-              <strong>0</strong>
+              <strong>{totalCards}</strong>
               <span className="muted">Cards</span>
             </div>
           </div>

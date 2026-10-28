@@ -4,6 +4,11 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Privacy from "./pages/Privacy";
 import SetEditor from "./pages/SetEditor";
+import Sets from "./pages/Sets";
+import SetView from "./pages/SetView";
+import FlipStudy from "./pages/FlipStudy";
+import QuizStudy from "./pages/QuizStudy";
+import WriteStudy from "./pages/WriteStudy";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import AppShell from "./components/layout/AppShell";
@@ -54,10 +59,53 @@ export default function App() {
 
         {/* Private pages. Logged-out visitors are sent to /login. */}
         <Route
+          path="/sets"
+          element={
+            <ProtectedRoute>
+              <Sets />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/sets/new"
           element={
             <ProtectedRoute>
               <SetEditor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sets/:id"
+          element={
+            <ProtectedRoute>
+              <SetView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sets/:id/flip"
+          element={
+            <ProtectedRoute>
+              <FlipStudy />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sets/:id/quiz"
+          element={
+            <ProtectedRoute>
+              <QuizStudy />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sets/:id/write"
+          element={
+            <ProtectedRoute>
+              <WriteStudy />
             </ProtectedRoute>
           }
         />

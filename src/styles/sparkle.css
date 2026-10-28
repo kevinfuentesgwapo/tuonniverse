@@ -33,6 +33,11 @@
 .set-panel,
 .set-row,
 .set-success,
+.set-tile,
+.set-state,
+.set-mode,
+.set-term-card,
+.set-view-head,
 .auth-card {
   background-image:
     linear-gradient(225deg, transparent 0%, var(--surface) 60%),

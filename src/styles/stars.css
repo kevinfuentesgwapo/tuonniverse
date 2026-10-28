@@ -1,0 +1,67 @@
+/* Starred cards. Colors only from variables. */
+
+/* Star button under the flip card */
+.fc-star-row {
+  display: flex;
+  justify-content: center;
+}
+
+/* Star button in each row on the set page.
+   It sits in the corner, so it works with any row layout. */
+.set-term-card {
+  position: relative;
+  padding-right: 68px;
+}
+.set-star {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.set-star:hover {
+  border-color: var(--accent);
+}
+.set-star[aria-pressed="true"] {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.set-star:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+
+/* "Study only my starred cards" switch */
+.star-only {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.star-only input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+.star-only.is-off {
+  opacity: 0.7;
+  cursor: default;
+}
+.star-hint {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+}

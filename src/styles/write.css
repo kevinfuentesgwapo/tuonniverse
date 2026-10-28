@@ -1,0 +1,81 @@
+/* Write study mode. Colors only from variables.
+   It also reuses qz-* classes from quiz.css and fc-* classes from flip.css. */
+
+.wr-field {
+  display: grid;
+  gap: 8px;
+}
+.wr-label {
+  font-weight: 700;
+}
+.wr-input {
+  width: 100%;
+  min-height: 96px;
+  padding: 14px 16px;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  resize: vertical;
+}
+.wr-input:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+  border-color: var(--accent);
+}
+.wr-input[readonly] {
+  opacity: 0.85;
+}
+.wr-input::placeholder {
+  color: var(--muted);
+}
+
+.wr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.wr-actions .fc-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* The answer box */
+.wr-compare {
+  display: grid;
+  gap: 10px;
+}
+.wr-box {
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  overflow-wrap: anywhere;
+}
+.wr-box.is-answer {
+  border-color: var(--cyan);
+  box-shadow: inset 0 0 0 2px var(--cyan);
+}
+.wr-box-tag {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Phones */
+@media (max-width: 520px) {
+  .wr-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .wr-actions .fc-btn {
+    width: 100%;
+  }
+}

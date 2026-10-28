@@ -316,3 +316,380 @@
     transform: none;
   }
 }
+
+/* ===================== SETS LIST ===================== */
+.sets-page {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+}
+.sets-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sets-head h1,
+.sets-head p {
+  margin: 0;
+}
+.sets-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sets-filter {
+  display: grid;
+  gap: 6px;
+  max-width: 360px;
+  margin-bottom: 16px;
+}
+.sets-message {
+  justify-items: start;
+}
+.sets-message h2,
+.sets-message p {
+  margin: 0;
+}
+
+.set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.set-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 130px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+.set-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+.set-tile-title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.set-tile-desc {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.set-tile-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  font-size: 0.85rem;
+}
+.set-tile-count {
+  padding: 2px 10px;
+  font-weight: 700;
+  color: var(--accent-text);
+  background: var(--accent);
+  border-radius: 999px;
+}
+.set-tile.is-ghost {
+  justify-content: flex-end;
+  opacity: 0.7;
+  animation: home-pulse 2.4s ease-in-out infinite;
+}
+.set-tile.is-ghost:hover {
+  transform: none;
+  border-color: var(--border);
+}
+
+/* ===================== HOME CONNECTIONS ===================== */
+/* A launch pad tile that is a real link */
+.home-tile.is-link {
+  color: inherit;
+  text-decoration: none;
+  border-style: solid;
+  cursor: pointer;
+}
+.home-tile.is-link .home-badge {
+  color: var(--accent-text);
+  font-weight: 700;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+/* "Make one" link inside the quests list */
+.home-badge-link {
+  color: var(--accent-text);
+  font-weight: 700;
+  text-decoration: none;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.home-sets-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-see-all {
+  font-weight: 700;
+  color: var(--cyan);
+  text-decoration: none;
+}
+.home-see-all:hover {
+  text-decoration: underline;
+}
+.home-empty .btn {
+  margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-tile {
+    transition: none;
+  }
+  .set-tile:hover {
+    transform: none;
+  }
+  .set-tile.is-ghost {
+    animation: none;
+  }
+}
+
+/* ===================== SETS LIST + SET PAGE ===================== */
+.sets-page,
+.set-view {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+}
+.sets-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sets-head h1 {
+  margin: 0;
+}
+.sets-head p {
+  margin: 2px 0 0;
+}
+
+/* ---------- Set tiles ---------- */
+.set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+.set-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+.set-tile:hover {
+  transform: translateY(-4px) rotate(-1deg);
+  border-color: var(--accent);
+}
+.set-tile h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}
+.set-tile-desc {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.set-tile-meta {
+  margin-top: auto;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+/* ---------- Friendly empty / error box ---------- */
+.set-state {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 36px 20px;
+  text-align: center;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+}
+.set-state h2,
+.set-state p {
+  margin: 0;
+}
+.set-state-planet {
+  animation: home-float 4s ease-in-out infinite;
+}
+
+/* ---------- One set ---------- */
+.set-view-head {
+  margin-bottom: 20px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.set-view-head h1 {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+.set-view-head p {
+  margin: 0 0 6px;
+}
+.set-view-meta {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+.set-modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.set-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px dashed var(--accent);
+}
+.set-cards-title {
+  margin-top: 28px;
+}
+.set-terms {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.set-term-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 2fr);
+  align-items: start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.set-term-card .set-row-num {
+  margin-top: 0;
+}
+.set-term-word,
+.set-term-def {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.set-term-def {
+  color: var(--muted);
+}
+
+/* ---------- Delete ---------- */
+.set-danger {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.set-delete {
+  color: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+.set-confirm p {
+  margin: 0 0 10px;
+}
+
+/* ---------- Home: real tiles and sets header ---------- */
+.home-tile.is-link {
+  color: inherit;
+  text-decoration: none;
+  border-style: solid;
+}
+.home-go {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+.home-quest .home-go {
+  margin: 0 0 0 auto;
+}
+.home-go:hover {
+  text-decoration: underline;
+}
+.home-sets-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.home-see-all {
+  font-weight: 700;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+.home-see-all:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .set-term-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .set-term-def {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-state-planet {
+    animation: none;
+  }
+  .set-tile {
+    transition: none;
+  }
+  .set-tile:hover {
+    transform: none;
+  }
+}
