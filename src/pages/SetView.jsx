@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/ui/Icon";
 import { deleteSet, getSet } from "../hooks/useSets";
 import { setCardStarred } from "../lib/starCards";
@@ -23,6 +23,8 @@ function formatDate(value) {
 export default function SetView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const justSaved = Boolean(location.state?.saved);
   const [status, setStatus] = useState("loading"); // loading | ready | missing | error
   const [data, setData] = useState(null);
   const [confirming, setConfirming] = useState(false);
@@ -153,6 +155,14 @@ export default function SetView() {
             <span aria-hidden="true">★</span> {starredCount} starred
           </p>
         )}
+        {justSaved && (
+          <p className="set-notice" role="status">
+            Saved! Your changes are in.
+          </p>
+        )}
+        <Link to={`/sets/${id}/edit`} className="btn">
+          Edit set
+        </Link>
       </header>
 
       <section aria-label="Study modes">

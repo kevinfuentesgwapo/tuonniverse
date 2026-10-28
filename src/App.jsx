@@ -9,6 +9,8 @@ import SetView from "./pages/SetView";
 import FlipStudy from "./pages/FlipStudy";
 import QuizStudy from "./pages/QuizStudy";
 import WriteStudy from "./pages/WriteStudy";
+import Notes from "./pages/Notes";
+import NoteEditor from "./pages/NoteEditor";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import AppShell from "./components/layout/AppShell";
@@ -75,6 +77,14 @@ export default function App() {
           }
         />
         <Route
+          path="/sets/:id/edit"
+          element={
+            <ProtectedRoute>
+              <SetEditor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/sets/:id"
           element={
             <ProtectedRoute>
@@ -106,6 +116,31 @@ export default function App() {
           element={
             <ProtectedRoute>
               <WriteStudy />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notes"
+          element={
+            <ProtectedRoute>
+              <Notes />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notes/new"
+          element={
+            <ProtectedRoute>
+              <NoteEditor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notes/:id"
+          element={
+            <ProtectedRoute>
+              <NoteEditor />
             </ProtectedRoute>
           }
         />

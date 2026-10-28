@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useSets from "../hooks/useSets";
+import useStudyProgress from "../hooks/useStudyProgress";
 import Icon from "../components/ui/Icon";
 import SetTile from "../components/flashcards/SetTile";
 import FocusTimer from "../components/home/FocusTimer";
@@ -121,8 +122,31 @@ const TIPS = [
 ];
 
 const WEEK = ["M", "T", "W", "T", "F", "S", "S"];
+const WEEK_NAMES = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
-// Daily goal ring. Real progress comes when study is built.
+// How each saved mode is named, and which page it opens.
+const MODE_INFO = {
+  flashcards: { label: "Flip cards", path: "flip" },
+  quiz: { label: "Quiz", path: "quiz" },
+  write: { label: "Write", path: "write" },
+};
+
+// Colors for a day you studied. Colors come only from CSS variables.
+const DONE_DOT = {
+  background: "var(--accent)",
+  color: "var(--accent-text)",
+  borderColor: "var(--accent)",
+};
+
+// Daily goal ring. Fills as you finish cards today.
 const GOAL_CARDS = 10;
 const GOAL_RADIUS = 26;
 const GOAL_CIRCLE = 2 * Math.PI * GOAL_RADIUS;
@@ -208,6 +232,7 @@ function LoggedInHome({ user }) {
     error: setsError,
     totalCards,
   } = useSets();
+  const progress = useStudyProgress();
   const [taps, setTaps] = useState(0);
   const [mood, setMood] = useState(null);
   const [tipIndex, setTipIndex] = useState(new Date().getDate() % TIPS.length);
@@ -216,14 +241,45 @@ function LoggedInHome({ user }) {
     taps === 0 ? INTRO_LINE : MASCOT_LINES[(taps - 1) % MASCOT_LINES.length];
   const moodReply = MOODS.find((item) => item.id === mood)?.reply;
 
-  const quests = QUESTS.map((quest) =>
-    quest.id === "set" ? { ...quest, done: sets.length > 0 } : quest,
-  );
+  const quests = QUESTS.map((quest) => {
+    if (quest.id === "set") return { ...quest, done: sets.length > 0 };
+    if (quest.id === "study") return { ...quest, done: progress.hasStudied };
+    return quest;
+  });
   const doneCount = quests.filter((quest) => quest.done).length;
   const percent = Math.round((doneCount / quests.length) * 100);
 
   // Monday is the first dot. getDay() gives Sunday = 0.
   const todayIndex = (new Date().getDay() + 6) % 7;
+
+  // "Continue studying": the last set you practiced, if it still exists.
+  const lastSet = progress.last
+    ? sets.find((set) => set.id === progress.last.setId)
+    : null;
+  const lastMode = progress.last ? MODE_INFO[progress.last.mode] : null;
+  // Quiz needs 2+ cards. If the set is too small now, open the set page.
+  const continueTo =
+    lastSet && lastMode
+      ? progress.last.mode === "quiz" && lastSet.cardCount < 2
+        ? `/sets/${lastSet.id}`
+        : lastSet.cardCount === 0
+          ? `/sets/${lastSet.id}`
+          : `/sets/${lastSet.id}/${lastMode.path}`
+      : null;
+
+  // Daily goal ring.
+  const goalShare = Math.min(1, progress.cardsToday / GOAL_CARDS);
+  const goalLeft = Math.max(0, GOAL_CARDS - progress.cardsToday);
+  const goalText =
+    goalLeft === 0
+      ? "Daily goal done. Amazing!"
+      : `${goalLeft} more to go today`;
+
+  const streakNote = progress.studiedToday
+    ? "You studied today. Nice work!"
+    : progress.streak > 0
+      ? "Study a little today to keep your streak growing."
+      : "Study a little today and your streak starts.";
 
   return (
     <div className="home-dash">
@@ -253,6 +309,18 @@ function LoggedInHome({ user }) {
             />
           </button>
         </section>
+
+        {continueTo && (
+          <section className="home-quests" aria-label="Continue studying">
+            <h2 className="home-quests-title">Continue studying</h2>
+            <p className="muted">
+              Last time: {lastMode.label} with “{lastSet.title}”.
+            </p>
+            <Link to={continueTo} className="btn btn-primary">
+              Keep going
+            </Link>
+          </section>
+        )}
 
         <section className="home-mood" aria-label="How are you feeling?">
           <h2 className="home-mood-title">How are you feeling today?</h2>
@@ -302,11 +370,16 @@ function LoggedInHome({ user }) {
                   {quest.done ? "✓" : ""}
                 </span>
                 <span>{quest.text}</span>
-                {!quest.done && quest.id !== "set" && (
+                {!quest.done && quest.id === "ai" && (
                   <span className="home-badge">Soon</span>
                 )}
                 {!quest.done && quest.id === "set" && (
                   <Link to="/sets/new" className="home-go">
+                    Start
+                  </Link>
+                )}
+                {!quest.done && quest.id === "study" && (
+                  <Link to="/sets" className="home-go">
                     Start
                   </Link>
                 )}
@@ -412,7 +485,7 @@ function LoggedInHome({ user }) {
               <Icon name="flame" size={28} />
             </span>
             <div>
-              <strong>0</strong>
+              <strong>{progress.streak}</strong>
               <span className="muted"> day streak</span>
             </div>
           </div>
@@ -424,15 +497,14 @@ function LoggedInHome({ user }) {
                 className={
                   index === todayIndex ? "home-day is-today" : "home-day"
                 }
+                style={progress.weekDone[index] ? DONE_DOT : undefined}
+                title={`${WEEK_NAMES[index]}${progress.weekDone[index] ? ": studied" : ""}`}
               >
                 {letter}
               </span>
             ))}
           </div>
-          <p className="muted home-side-note">
-            Study a little today and your streak starts. Streaks are coming
-            soon.
-          </p>
+          <p className="muted home-side-note">{streakNote}</p>
 
           <div className="home-goal">
             <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
@@ -448,12 +520,14 @@ function LoggedInHome({ user }) {
                 cy="32"
                 r={GOAL_RADIUS}
                 strokeDasharray={GOAL_CIRCLE}
-                strokeDashoffset={GOAL_CIRCLE}
+                strokeDashoffset={GOAL_CIRCLE * (1 - goalShare)}
               />
             </svg>
             <div>
-              <strong>0 / {GOAL_CARDS}</strong>
-              <p className="muted">cards today</p>
+              <strong>
+                {progress.cardsToday} / {GOAL_CARDS}
+              </strong>
+              <p className="muted">{goalText}</p>
             </div>
           </div>
 

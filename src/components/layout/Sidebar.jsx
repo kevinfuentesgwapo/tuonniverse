@@ -7,7 +7,7 @@ import Icon from "../ui/Icon";
 const ITEMS = [
   { to: "/", label: "Home", icon: "home", built: true },
   { to: "/sets", label: "Sets", icon: "sets", built: true },
-  { to: "/notes", label: "Notes", icon: "notes", built: false },
+  { to: "/notes", label: "Notes", icon: "notes", built: true },
   { to: "/study", label: "Study", icon: "study", built: false },
 ];
 

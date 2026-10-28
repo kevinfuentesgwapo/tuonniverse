@@ -1,0 +1,185 @@
+/* NOTES
+   Note tiles (list page) and the writing page.
+   Colors come only from CSS variables. */
+
+/* ---------- List: tiles ---------- */
+.nt-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  min-height: 150px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+.nt-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+.nt-tile h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nt-tile-text {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.nt-tile-meta {
+  margin-top: auto;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---------- Writing page ---------- */
+.nt-editor {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.nt-back {
+  display: inline-block;
+  padding: 10px 0;
+  color: var(--accent-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+.nt-back:hover {
+  text-decoration: underline;
+}
+.nt-heading {
+  margin: 4px 0 14px;
+}
+
+.nt-title,
+.nt-body {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  font-family: inherit;
+}
+.nt-title {
+  padding: 14px 16px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.nt-body {
+  display: block;
+  padding: 16px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  min-height: 50vh;
+  resize: vertical;
+}
+.nt-title::placeholder,
+.nt-body::placeholder {
+  color: var(--muted);
+}
+.nt-title:focus-visible,
+.nt-body:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+.nt-message {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.nt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.nt-status {
+  font-weight: 700;
+  color: var(--muted);
+}
+.nt-status.is-saved {
+  color: var(--accent-strong);
+  animation: nt-pop 0.4s ease;
+}
+.nt-hint {
+  font-size: 0.85rem;
+}
+.nt-delete {
+  margin-left: auto;
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--border);
+}
+.nt-delete:hover {
+  border-color: var(--violet);
+}
+
+.nt-confirm {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 2px solid var(--violet);
+  border-radius: 16px;
+}
+.nt-confirm p {
+  margin: 0 0 12px;
+}
+.nt-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.nt-confirm-actions .nt-delete {
+  margin-left: 0;
+}
+
+@keyframes nt-pop {
+  0% {
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 700px) {
+  .nt-delete {
+    margin-left: 0;
+  }
+  .nt-body {
+    min-height: 40vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nt-tile,
+  .nt-status.is-saved {
+    transition: none;
+    animation: none;
+  }
+  .nt-tile:hover {
+    transform: none;
+  }
+}

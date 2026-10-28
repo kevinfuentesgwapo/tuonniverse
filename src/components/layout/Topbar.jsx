@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../brand/Logo";
 import Icon from "../ui/Icon";
 import useAuth from "../../hooks/useAuth";
+import useStudyProgress from "../../hooks/useStudyProgress";
 import { supabase } from "../../lib/supabase";
 
 // Items in the Create menu.
 // When a tool is built, add  to: "/the-page"  and it becomes a real link.
 const CREATE_ITEMS = [
   { label: "New set", icon: "sets", to: "/sets/new" },
-  { label: "New note", icon: "notes" },
+  { label: "New note", icon: "notes", to: "/notes/new" },
   { label: "Generate with AI", icon: "sparkles" },
 ];
 
@@ -23,6 +24,11 @@ function getDisplayName(user) {
 export default function Topbar({ theme, onToggleTheme }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Loads again when you open a new page, so the streak is always fresh.
+  const { streak, loading: streakLoading } = useStudyProgress(
+    location.pathname,
+  );
   const [openMenu, setOpenMenu] = useState(null); // "create" | "profile" | null
   const createRef = useRef(null);
   const profileRef = useRef(null);
@@ -126,8 +132,13 @@ export default function Topbar({ theme, onToggleTheme }) {
           )}
         </div>
 
-        <span className="streak-chip" title="Study streak (coming soon)">
-          <Icon name="flame" size={18} />0
+        <span
+          className="streak-chip"
+          title="Your day streak"
+          aria-label={streakLoading ? "Day streak" : `Day streak: ${streak}`}
+        >
+          <Icon name="flame" size={18} />
+          {streakLoading ? "–" : streak}
         </span>
 
         <button

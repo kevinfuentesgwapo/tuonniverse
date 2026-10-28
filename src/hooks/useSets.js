@@ -109,6 +109,78 @@ export async function getSet(id) {
   return { set, cards };
 }
 
+// ---------- Save changes to a set ----------
+// title, description: the new text for the set.
+// removedIds: ids of cards to delete.
+// changed: existing cards that changed [{ id, term, definition, position }].
+// added: brand new cards [{ term, definition, position }].
+// Stars are never touched, so starred cards stay starred.
+export async function updateSet({
+  setId,
+  userId,
+  title,
+  description,
+  removedIds = [],
+  changed = [],
+  added = [],
+}) {
+  // 1. The set itself. If nothing changed, the update rule is missing.
+  const { data: updated, error: setError } = await supabase
+    .from("sets")
+    .update({
+      title,
+      description: description || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", setId)
+    .select("id");
+
+  if (setError) throw setError;
+  if (!updated || updated.length === 0) {
+    throw new Error("The set was not updated (check the sets UPDATE policy).");
+  }
+
+  // 2. Remove cards. In small groups so the web address stays short.
+  for (let i = 0; i < removedIds.length; i += 100) {
+    const group = removedIds.slice(i, i + 100);
+    const { error: removeError } = await supabase
+      .from("cards")
+      .delete()
+      .eq("set_id", setId)
+      .in("id", group);
+    if (removeError) throw removeError;
+  }
+
+  // 3. Change existing cards in one go.
+  if (changed.length > 0) {
+    const rows = changed.map((card) => ({
+      id: card.id,
+      set_id: setId,
+      user_id: userId,
+      term: card.term,
+      definition: card.definition,
+      position: card.position,
+    }));
+    const { error: changeError } = await supabase
+      .from("cards")
+      .upsert(rows, { onConflict: "id" });
+    if (changeError) throw changeError;
+  }
+
+  // 4. Add new cards.
+  if (added.length > 0) {
+    const rows = added.map((card) => ({
+      set_id: setId,
+      user_id: userId,
+      term: card.term,
+      definition: card.definition,
+      position: card.position,
+    }));
+    const { error: addError } = await supabase.from("cards").insert(rows);
+    if (addError) throw addError;
+  }
+}
+
 // ---------- Delete a set and its cards ----------
 export async function deleteSet(id) {
   const { error: cardsError } = await supabase

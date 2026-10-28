@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import Icon from "../components/ui/Icon";
-import { createSet } from "../hooks/useSets";
+import { createSet, getSet, updateSet } from "../hooks/useSets";
 import { parseCards } from "../lib/parseCards";
 
 const MAX_CARDS = 500;
@@ -10,10 +10,11 @@ const START_ROWS = 3;
 const CONFETTI_COUNT = 28;
 
 // Each row gets its own id, so React keeps the right inputs when we delete.
+// cardId = the real card in the database (null for a brand new card).
 let rowCounter = 0;
-function newRow(term = "", definition = "") {
+function newRow(term = "", definition = "", cardId = null) {
   rowCounter += 1;
-  return { id: rowCounter, term, definition };
+  return { id: rowCounter, cardId, term, definition };
 }
 
 function isFilled(row) {
@@ -21,6 +22,15 @@ function isFilled(row) {
 }
 function isComplete(row) {
   return row.term.trim() !== "" && row.definition.trim() !== "";
+}
+
+// A short text that changes when anything on the page changes.
+function makeSignature(title, description, rows) {
+  return JSON.stringify([
+    title,
+    description,
+    rows.map((row) => [row.cardId, row.term, row.definition]),
+  ]);
 }
 
 function focusField(id, field) {
@@ -50,10 +60,19 @@ function Confetti() {
 
 export default function SetEditor() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { id: setId } = useParams(); // only exists on /sets/:id/edit
+  const isEdit = Boolean(setId);
+
+  const [status, setStatus] = useState(isEdit ? "loading" : "ready"); // loading | ready | missing | error
+  const [reloadKey, setReloadKey] = useState(0);
+  const [baseline, setBaseline] = useState(null);
+  const originalRef = useRef(new Map()); // cardId -> { term, definition, position }
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [rows, setRows] = useState(() =>
-    Array.from({ length: START_ROWS }, () => newRow()),
+    Array.from({ length: isEdit ? 1 : START_ROWS }, () => newRow()),
   );
   const [showPaste, setShowPaste] = useState(false);
   const [pasteText, setPasteText] = useState("");
@@ -61,13 +80,61 @@ export default function SetEditor() {
   const [error, setError] = useState("");
   const [badId, setBadId] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(null); // { title, count }
+  const [saved, setSaved] = useState(null); // { title, count } (new sets only)
 
   const parsed = useMemo(() => parseCards(pasteText), [pasteText]);
   const readyCount = rows.filter(isComplete).length;
-  const dirty = Boolean(
-    !saved && (title.trim() || description.trim() || rows.some(isFilled)),
-  );
+  const signature = makeSignature(title, description, rows);
+  const dirty = isEdit
+    ? status === "ready" && baseline !== null && signature !== baseline
+    : Boolean(
+        !saved && (title.trim() || description.trim() || rows.some(isFilled)),
+      );
+
+  // When editing: load the set and its cards into the form.
+  useEffect(() => {
+    if (!isEdit) return undefined;
+    let cancelled = false;
+    getSet(setId)
+      .then((result) => {
+        if (cancelled) return;
+        if (!result) {
+          setStatus("missing");
+          return;
+        }
+        const loadedRows = result.cards.length
+          ? result.cards.map((card) =>
+              newRow(card.term, card.definition, card.id),
+            )
+          : [newRow()];
+        const loadedDescription = result.set.description || "";
+        originalRef.current = new Map(
+          result.cards.map((card) => [
+            card.id,
+            {
+              term: card.term,
+              definition: card.definition,
+              position: card.position,
+            },
+          ]),
+        );
+        setTitle(result.set.title);
+        setDescription(loadedDescription);
+        setRows(loadedRows);
+        setBaseline(
+          makeSignature(result.set.title, loadedDescription, loadedRows),
+        );
+        setStatus("ready");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error(err);
+        setStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, setId, reloadKey]);
 
   // Warn before leaving the page with unsaved work.
   useEffect(() => {
@@ -80,11 +147,16 @@ export default function SetEditor() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  function updateRow(id, field, value) {
+  function retryLoad() {
+    setStatus("loading");
+    setReloadKey((n) => n + 1);
+  }
+
+  function updateRow(rowId, field, value) {
     setRows((list) =>
-      list.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
+      list.map((row) => (row.id === rowId ? { ...row, [field]: value } : row)),
     );
-    if (id === badId) setBadId(null);
+    if (rowId === badId) setBadId(null);
   }
 
   function addRow() {
@@ -97,9 +169,9 @@ export default function SetEditor() {
     focusField(row.id, "term");
   }
 
-  function removeRow(id) {
+  function removeRow(rowId) {
     setRows((list) =>
-      list.length === 1 ? [newRow()] : list.filter((row) => row.id !== id),
+      list.length === 1 ? [newRow()] : list.filter((row) => row.id !== rowId),
     );
   }
 
@@ -152,11 +224,8 @@ export default function SetEditor() {
       return;
     }
 
-    const cleaned = rows.filter(isComplete).map((row) => ({
-      term: row.term.trim(),
-      definition: row.definition.trim(),
-    }));
-    if (cleaned.length === 0) {
+    const complete = rows.filter(isComplete);
+    if (complete.length === 0) {
       setError("Add at least one card to save your set.");
       focusField(rows[0].id, "term");
       return;
@@ -165,6 +234,53 @@ export default function SetEditor() {
     setSaving(true);
     setError("");
     try {
+      if (isEdit) {
+        // Work out what changed, so we only send the changes.
+        const keptIds = new Set();
+        const changed = [];
+        const added = [];
+        complete.forEach((row, position) => {
+          const card = {
+            term: row.term.trim(),
+            definition: row.definition.trim(),
+            position,
+          };
+          if (row.cardId) {
+            keptIds.add(row.cardId);
+            const old = originalRef.current.get(row.cardId);
+            if (
+              !old ||
+              old.term !== card.term ||
+              old.definition !== card.definition ||
+              old.position !== position
+            ) {
+              changed.push({ id: row.cardId, ...card });
+            }
+          } else {
+            added.push(card);
+          }
+        });
+        const removedIds = [...originalRef.current.keys()].filter(
+          (cardId) => !keptIds.has(cardId),
+        );
+
+        await updateSet({
+          setId,
+          userId: user.id,
+          title: cleanTitle,
+          description: description.trim(),
+          removedIds,
+          changed,
+          added,
+        });
+        navigate(`/sets/${setId}`, { state: { saved: true } });
+        return;
+      }
+
+      const cleaned = complete.map((row) => ({
+        term: row.term.trim(),
+        definition: row.definition.trim(),
+      }));
       await createSet({
         userId: user.id,
         title: cleanTitle,
@@ -176,7 +292,9 @@ export default function SetEditor() {
     } catch (err) {
       console.error(err);
       setError(
-        "We could not save your set. Check your internet and try again. Your cards are still here.",
+        isEdit
+          ? "We could not save your changes. Check your internet and try again. Your edits are still here."
+          : "We could not save your set. Check your internet and try again. Your cards are still here.",
       );
     } finally {
       setSaving(false);
@@ -195,7 +313,51 @@ export default function SetEditor() {
     setSaved(null);
   }
 
-  // ---------- Saved! ----------
+  // ---------- Loading / not found / error (edit only) ----------
+  if (isEdit && status === "loading") {
+    return (
+      <main className="set-editor">
+        <p className="muted" aria-live="polite">
+          Opening your set…
+        </p>
+      </main>
+    );
+  }
+
+  if (isEdit && (status === "missing" || status === "error")) {
+    return (
+      <main className="set-editor">
+        <section className="set-state">
+          <h2>
+            {status === "missing"
+              ? "We could not find this set"
+              : "Hmm, that did not load"}
+          </h2>
+          <p className="muted">
+            {status === "missing"
+              ? "It may have been deleted. Your other sets are safe."
+              : "Check your internet, then try again."}
+          </p>
+          <div className="set-success-actions">
+            {status === "error" && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={retryLoad}
+              >
+                Try again
+              </button>
+            )}
+            <Link to="/sets" className="btn">
+              Back to my sets
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  // ---------- Saved! (new sets) ----------
   if (saved) {
     return (
       <main className="set-editor">
@@ -221,13 +383,10 @@ export default function SetEditor() {
             >
               Make another set
             </button>
-            <Link to="/" className="btn">
-              Back to Home
+            <Link to="/sets" className="btn">
+              See my sets
             </Link>
           </div>
-          <p className="muted set-success-note">
-            Study modes (flip cards, quiz, write) are coming next.
-          </p>
         </section>
       </main>
     );
@@ -236,8 +395,8 @@ export default function SetEditor() {
   // ---------- The editor ----------
   return (
     <main className="set-editor">
-      <Link to="/" className="set-back">
-        ← Home
+      <Link to={isEdit ? `/sets/${setId}` : "/"} className="set-back">
+        {isEdit ? "← Back to set" : "← Home"}
       </Link>
 
       <header className="set-head">
@@ -245,9 +404,11 @@ export default function SetEditor() {
           <Icon name="sets" size={24} />
         </span>
         <div>
-          <h1>Make a new set</h1>
+          <h1>{isEdit ? "Edit your set" : "Make a new set"}</h1>
           <p className="muted">
-            Add a term and a definition for each card. You can add more later.
+            {isEdit
+              ? "Change anything you like. Press Save changes when you are done."
+              : "Add a term and a definition for each card. You can add more later."}
           </p>
         </div>
       </header>
@@ -418,7 +579,7 @@ export default function SetEditor() {
             className="btn btn-primary set-save-btn"
             disabled={saving}
           >
-            {saving ? "Saving…" : "Save set"}
+            {saving ? "Saving…" : isEdit ? "Save changes" : "Save set"}
           </button>
         </div>
       </form>
