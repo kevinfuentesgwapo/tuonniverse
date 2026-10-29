@@ -13,6 +13,11 @@ const AFTER_KEY = "tuoniverse-after-login";
 // our own email sender. Google and Facebook login work without email.
 const EMAIL_LOGIN = false;
 
+// Facebook login is OFF for now.
+// Meta needs business verification before other people can use it.
+// Turn this on when Facebook allows it (see Meta app -> Publish).
+const FACEBOOK_LOGIN = false;
+
 // Only allow paths inside our own app (safety).
 const safePath = (p) =>
   typeof p === "string" && p.startsWith("/") && !p.startsWith("//") ? p : "/";
@@ -87,6 +92,17 @@ function FacebookIcon() {
       <path
         fill="#ffffff"
         d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"
+      />
+    </svg>
+  );
+}
+
+function DiscordIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#5865F2"
+        d="M20.32 4.37A19.8 19.8 0 0 0 15.43 2.9a.07.07 0 0 0-.08.04c-.21.38-.45.87-.61 1.26a18.3 18.3 0 0 0-5.49 0 12.6 12.6 0 0 0-.62-1.26.08.08 0 0 0-.08-.04 19.7 19.7 0 0 0-4.89 1.47.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 5.99 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.22-2a.08.08 0 0 0-.04-.1 13 13 0 0 1-1.87-.9.08.08 0 0 1 0-.13l.37-.29a.07.07 0 0 1 .08-.01c3.93 1.8 8.18 1.8 12.07 0a.07.07 0 0 1 .08.01l.37.29a.08.08 0 0 1 0 .13c-.6.35-1.22.65-1.87.9a.08.08 0 0 0-.04.1c.36.7.77 1.37 1.22 2a.08.08 0 0 0 .08.03 19.8 19.8 0 0 0 6-3.03.08.08 0 0 0 .03-.05c.5-5.18-.84-9.67-3.55-13.66a.06.06 0 0 0-.03-.03zM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42s.96-2.42 2.16-2.42c1.21 0 2.18 1.09 2.16 2.42 0 1.34-.96 2.42-2.16 2.42zm7.97 0c-1.18 0-2.16-1.08-2.16-2.42s.96-2.42 2.16-2.42c1.21 0 2.18 1.09 2.16 2.42 0 1.34-.95 2.42-2.16 2.42z"
       />
     </svg>
   );
@@ -319,12 +335,22 @@ export default function Login() {
               </button>
               <button
                 type="button"
-                className="oauth-btn oauth-facebook"
-                onClick={() => handleOAuth("facebook")}
+                className="oauth-btn"
+                onClick={() => handleOAuth("discord")}
                 disabled={busy}
               >
-                <FacebookIcon /> Continue with Facebook
+                <DiscordIcon /> Continue with Discord
               </button>
+              {FACEBOOK_LOGIN && (
+                <button
+                  type="button"
+                  className="oauth-btn oauth-facebook"
+                  onClick={() => handleOAuth("facebook")}
+                  disabled={busy}
+                >
+                  <FacebookIcon /> Continue with Facebook
+                </button>
+              )}
             </div>
             {EMAIL_LOGIN ? (
               <div className="divider" role="separator">
