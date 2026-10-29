@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import useCardStars from "../../hooks/useCardStars";
 
 // Confetti bits for the "all done" screen. Fixed values, nothing random.
 const BITS = Array.from({ length: 16 }, (_, i) => ({
@@ -74,6 +75,11 @@ export default function WriteMode({ cards, onFinish }) {
   const nextRef = useRef(null);
   const againRef = useRef(null);
   const savedRef = useRef(false);
+  const {
+    isStarred,
+    toggle: toggleStar,
+    error: starError,
+  } = useCardStars(cards);
 
   const total = questions.length;
   const card = questions[index];
@@ -88,6 +94,22 @@ export default function WriteMode({ cards, onFinish }) {
   useEffect(() => {
     if (status !== null && !done) nextRef.current?.focus();
   }, [status, done]);
+
+  // Press S to star the card. Only after checking, so typing is not affected.
+  useEffect(() => {
+    if (!checked || done || !card) return;
+    function onKey(e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = e.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "s" || e.key === "S") {
+        e.preventDefault();
+        toggleStar(card.id);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [checked, done, card, toggleStar]);
 
   // When the "all done" screen shows, move focus to "Try again"
   useEffect(() => {
@@ -247,6 +269,12 @@ export default function WriteMode({ cards, onFinish }) {
             </p>
           )}
 
+          {starError && (
+            <p className="muted fc-save-note" role="status">
+              {starError}
+            </p>
+          )}
+
           {missed.length > 0 && (
             <div className="qz-missed">
               <h3>Worth another look</h3>
@@ -255,6 +283,21 @@ export default function WriteMode({ cards, onFinish }) {
                   <li key={r.card.id}>
                     <strong>{r.card.term}</strong>
                     <span>{r.card.definition}</span>
+                    <button
+                      type="button"
+                      className="set-star"
+                      aria-pressed={isStarred(r.card.id)}
+                      aria-label={
+                        isStarred(r.card.id)
+                          ? `Unstar ${r.card.term}`
+                          : `Star ${r.card.term}`
+                      }
+                      onClick={() => toggleStar(r.card.id)}
+                    >
+                      <span aria-hidden="true">
+                        {isStarred(r.card.id) ? "★" : "☆"}
+                      </span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -339,17 +382,28 @@ export default function WriteMode({ cards, onFinish }) {
                 </div>
               )}
               <div className="wr-actions">
-                {status === "wrong" ? (
+                <span className="wr-actions-left">
+                  {status === "wrong" && (
+                    <button
+                      type="button"
+                      className="btn fc-btn"
+                      onClick={countAsRight}
+                    >
+                      I was right
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="btn fc-btn"
-                    onClick={countAsRight}
+                    aria-pressed={isStarred(card.id)}
+                    onClick={() => toggleStar(card.id)}
                   >
-                    I was right
+                    <span aria-hidden="true">
+                      {isStarred(card.id) ? "★" : "☆"}
+                    </span>{" "}
+                    {isStarred(card.id) ? "Starred" : "Star this card"}
                   </button>
-                ) : (
-                  <span />
-                )}
+                </span>
                 <button
                   type="button"
                   ref={nextRef}
@@ -363,9 +417,16 @@ export default function WriteMode({ cards, onFinish }) {
             </>
           )}
 
+          {starError && (
+            <p className="muted fc-save-note" role="status">
+              {starError}
+            </p>
+          )}
+
           <p className="muted fc-hint">
             Capital letters and small typos are forgiven. Press Enter to check,
-            or Shift+Enter for a new line.
+            or Shift+Enter for a new line. After checking, press S to star the
+            card.
           </p>
         </>
       )}

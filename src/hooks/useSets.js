@@ -89,7 +89,7 @@ export async function createSet({ userId, title, description, cards }) {
 export async function getSet(id) {
   const { data: set, error: setError } = await supabase
     .from("sets")
-    .select("id, title, description, created_at")
+    .select("id, title, description, created_at, share_code")
     .eq("id", id)
     .maybeSingle();
 
@@ -191,4 +191,15 @@ export async function deleteSet(id) {
 
   const { error: setError } = await supabase.from("sets").delete().eq("id", id);
   if (setError) throw setError;
+}
+
+// ---------- Turn sharing on or off for one set ----------
+// Returns the share code when sharing is on, or null when it is off.
+export async function setSharing(setId, enabled) {
+  const { data, error } = await supabase.rpc("set_sharing", {
+    p_set_id: setId,
+    p_enabled: enabled,
+  });
+  if (error) throw error;
+  return data || null;
 }

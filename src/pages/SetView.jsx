@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/ui/Icon";
-import { deleteSet, getSet } from "../hooks/useSets";
+import { deleteSet, getSet, setSharing } from "../hooks/useSets";
 import { setCardStarred } from "../lib/starCards";
 
 // Study modes. A mode gets a "path" when we build it.
@@ -10,6 +10,8 @@ const MODES = [
   { label: "Flip cards", icon: "study", path: "flip" },
   { label: "Quiz", icon: "target", path: "quiz", min: 2 },
   { label: "Write", icon: "notes", path: "write" },
+  { label: "Match", icon: "bulb", path: "match", min: 2 },
+  { label: "Test", icon: "sparkles", path: "test", min: 4 },
 ];
 
 function formatDate(value) {
@@ -32,6 +34,9 @@ export default function SetView() {
   const [deleteError, setDeleteError] = useState("");
   const [starredOnly, setStarredOnly] = useState(false);
   const [starError, setStarError] = useState("");
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareError, setShareError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -92,6 +97,37 @@ export default function SetView() {
     }
   }
 
+  // Turn the share link on or off.
+  async function toggleSharing(on) {
+    if (shareBusy) return;
+    setShareBusy(true);
+    setShareError("");
+    setCopied(false);
+    try {
+      const code = await setSharing(id, on);
+      setData((d) => ({ ...d, set: { ...d.set, share_code: code } }));
+    } catch (err) {
+      console.error(err);
+      setShareError("We could not change sharing. Please try again.");
+    } finally {
+      setShareBusy(false);
+    }
+  }
+
+  async function copyLink(link) {
+    setShareError("");
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (err) {
+      console.error(err);
+      setShareError(
+        "We could not copy it. Select the link and copy it by hand.",
+      );
+    }
+  }
+
   if (status === "loading") {
     return (
       <main className="set-view">
@@ -132,6 +168,9 @@ export default function SetView() {
   }
 
   const { set, cards } = data;
+  const shareLink = set.share_code
+    ? `${window.location.origin}/s/${set.share_code}`
+    : "";
   const starredCount = cards.filter((c) => c.starred).length;
   // If the last star is removed, "only starred" turns itself off.
   const onlyStarred = starredOnly && starredCount > 0;
@@ -221,6 +260,67 @@ export default function SetView() {
             );
           })}
         </div>
+      </section>
+
+      <section className="set-panel share-box" aria-label="Share this set">
+        <h2 className="set-section-title">Share this set</h2>
+        {!set.share_code ? (
+          <>
+            <p className="muted">
+              Only you can see this set. Turn on sharing to get a link for your
+              friends. They can study it and save their own copy. They can never
+              change your set.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={shareBusy}
+              onClick={() => toggleSharing(true)}
+            >
+              {shareBusy ? "Please wait…" : "Turn on sharing"}
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="muted">
+              Anyone with this link can study this set. Turn sharing off to stop
+              the link from working.
+            </p>
+            <div className="share-row">
+              <input
+                className="set-input share-link"
+                type="text"
+                readOnly
+                value={shareLink}
+                aria-label="Share link"
+                onFocus={(e) => e.target.select()}
+              />
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => copyLink(shareLink)}
+              >
+                {copied ? "Copied!" : "Copy link"}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                disabled={shareBusy}
+                onClick={() => toggleSharing(false)}
+              >
+                {shareBusy ? "Please wait…" : "Turn off sharing"}
+              </button>
+            </div>
+            <p className="muted" role="status" aria-live="polite">
+              {copied ? "Link copied. Send it to a friend!" : ""}
+            </p>
+          </>
+        )}
+        {shareError && (
+          <p className="set-error" role="status">
+            {shareError}
+          </p>
+        )}
       </section>
 
       <section aria-label="Cards in this set">

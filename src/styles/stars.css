@@ -65,3 +65,23 @@
   margin: 0 0 14px;
   font-size: 0.95rem;
 }
+
+/* Star buttons in Quiz and Write */
+.qz-footer {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.qz-footer .qz-star-btn {
+  margin-right: auto;
+}
+.wr-actions-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+/* Star in the "Worth another look" list (uses the round .set-star button) */
+.qz-missed li {
+  position: relative;
+  padding-right: 68px;
+}

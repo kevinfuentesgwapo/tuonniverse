@@ -144,6 +144,8 @@ const MODE_INFO = {
   flashcards: { label: "Flip cards", path: "flip" },
   quiz: { label: "Quiz", path: "quiz" },
   write: { label: "Write", path: "write" },
+  match: { label: "Match", path: "match" },
+  test: { label: "Test", path: "test" },
 };
 
 // Colors for a day you studied. Colors come only from CSS variables.
@@ -268,14 +270,16 @@ function LoggedInHome({ user }) {
     ? sets.find((set) => set.id === progress.last.setId)
     : null;
   const lastMode = progress.last ? MODE_INFO[progress.last.mode] : null;
-  // Quiz needs 2+ cards. If the set is too small now, open the set page.
+  // Quiz and Match need 2+ cards. Test needs 4+. If the set is too small now,
+  // open the set page instead.
+  const needCards = progress.last
+    ? ({ quiz: 2, match: 2, test: 4 }[progress.last.mode] ?? 1)
+    : 1;
   const continueTo =
     lastSet && lastMode
-      ? progress.last.mode === "quiz" && lastSet.cardCount < 2
+      ? lastSet.cardCount < needCards
         ? `/sets/${lastSet.id}`
-        : lastSet.cardCount === 0
-          ? `/sets/${lastSet.id}`
-          : `/sets/${lastSet.id}/${lastMode.path}`
+        : `/sets/${lastSet.id}/${lastMode.path}`
       : null;
 
   // "Cards due today" (spaced repetition). Friendly, never guilty.

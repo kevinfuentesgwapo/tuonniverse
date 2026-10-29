@@ -1,0 +1,112 @@
+/* Match game. Calm study mode: no sparkles. Colors only from variables. */
+
+.mt-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.mt-col {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.mt-col-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.mt-tile {
+  min-height: 64px; /* big tap target */
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    opacity 0.3s ease,
+    transform 0.15s ease;
+}
+.mt-tile:hover {
+  border-color: var(--accent);
+}
+.mt-tile:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+
+/* Picked: a thicker border, so it is not only a color change */
+.mt-tile.is-selected {
+  border-color: var(--accent-strong);
+  box-shadow: inset 0 0 0 2px var(--accent-strong);
+  transform: scale(1.02);
+}
+
+/* Not a pair: a gentle shake, no shame */
+.mt-tile.is-wrong {
+  border-color: var(--violet);
+  box-shadow: inset 0 0 0 2px var(--violet);
+  animation: mt-shake 0.4s ease;
+}
+
+/* A pair: it glows, then fades away. The space stays so nothing jumps. */
+.mt-tile.is-done {
+  border-color: var(--cyan);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+}
+
+@keyframes mt-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Phones */
+@media (max-width: 520px) {
+  .mt-board {
+    gap: 10px;
+  }
+  .mt-tile {
+    padding: 10px 8px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Calm mode */
+@media (prefers-reduced-motion: reduce) {
+  .mt-tile {
+    transition: none;
+  }
+  .mt-tile.is-selected {
+    transform: none;
+  }
+  .mt-tile.is-wrong {
+    animation: none;
+  }
+  .mt-tile.is-done {
+    transform: none;
+  }
+}

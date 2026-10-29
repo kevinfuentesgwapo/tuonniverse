@@ -1,0 +1,36 @@
+/* Footer (logged-in pages). Calm: no sparkles. Colors only from variables. */
+.site-footer {
+  margin-top: auto;
+  padding: 20px 16px 28px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.site-footer-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.site-footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 4px; /* bigger tap target */
+  border-radius: 6px;
+}
+
+.site-footer-links a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.site-footer-links a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.site-footer-note {
+  margin: 4px 0 0;
+}

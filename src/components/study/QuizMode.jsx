@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import useCardStars from "../../hooks/useCardStars";
 
 // Confetti bits for the "all done" screen. Fixed values, nothing random.
 const BITS = Array.from({ length: 16 }, (_, i) => ({
@@ -49,6 +50,11 @@ export default function QuizMode({ cards, onFinish }) {
   const nextRef = useRef(null);
   const againRef = useRef(null);
   const savedRef = useRef(false);
+  const {
+    isStarred,
+    toggle: toggleStar,
+    error: starError,
+  } = useCardStars(cards);
 
   const total = questions.length;
   const question = questions[index];
@@ -89,11 +95,14 @@ export default function QuizMode({ cards, onFinish }) {
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         goNext();
+      } else if ((e.key === "s" || e.key === "S") && picked !== null) {
+        e.preventDefault();
+        toggleStar(question.card.id);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [done, question, pick, goNext]);
+  }, [done, question, picked, pick, goNext, toggleStar]);
 
   // After you answer, move focus to the Next button
   useEffect(() => {
@@ -224,6 +233,12 @@ export default function QuizMode({ cards, onFinish }) {
             </p>
           )}
 
+          {starError && (
+            <p className="muted fc-save-note" role="status">
+              {starError}
+            </p>
+          )}
+
           {missed.length > 0 && (
             <div className="qz-missed">
               <h3>Worth another look</h3>
@@ -232,6 +247,21 @@ export default function QuizMode({ cards, onFinish }) {
                   <li key={r.card.id}>
                     <strong>{r.card.term}</strong>
                     <span>{r.card.definition}</span>
+                    <button
+                      type="button"
+                      className="set-star"
+                      aria-pressed={isStarred(r.card.id)}
+                      aria-label={
+                        isStarred(r.card.id)
+                          ? `Unstar ${r.card.term}`
+                          : `Star ${r.card.term}`
+                      }
+                      onClick={() => toggleStar(r.card.id)}
+                    >
+                      <span aria-hidden="true">
+                        {isStarred(r.card.id) ? "★" : "☆"}
+                      </span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -311,21 +341,40 @@ export default function QuizMode({ cards, onFinish }) {
 
           <div className="qz-footer">
             {picked !== null && (
-              <button
-                type="button"
-                ref={nextRef}
-                className="btn btn-primary fc-btn"
-                onClick={goNext}
-              >
-                {isLast ? "See my results" : "Next question"}{" "}
-                <span aria-hidden="true">→</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="btn fc-btn qz-star-btn"
+                  aria-pressed={isStarred(question.card.id)}
+                  onClick={() => toggleStar(question.card.id)}
+                >
+                  <span aria-hidden="true">
+                    {isStarred(question.card.id) ? "★" : "☆"}
+                  </span>{" "}
+                  {isStarred(question.card.id) ? "Starred" : "Star this card"}
+                </button>
+                <button
+                  type="button"
+                  ref={nextRef}
+                  className="btn btn-primary fc-btn"
+                  onClick={goNext}
+                >
+                  {isLast ? "See my results" : "Next question"}{" "}
+                  <span aria-hidden="true">→</span>
+                </button>
+              </>
             )}
           </div>
 
+          {starError && (
+            <p className="muted fc-save-note" role="status">
+              {starError}
+            </p>
+          )}
+
           <p className="muted fc-hint">
-            On a keyboard: press 1 to {question.options.length} to answer, and
-            the right arrow for the next question.
+            On a keyboard: press 1 to {question.options.length} to answer, the
+            right arrow for the next question, and S to star a card.
           </p>
         </>
       )}

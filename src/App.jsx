@@ -4,12 +4,15 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import SharedSet from "./pages/SharedSet";
 import SetEditor from "./pages/SetEditor";
 import Sets from "./pages/Sets";
 import SetView from "./pages/SetView";
 import FlipStudy from "./pages/FlipStudy";
 import QuizStudy from "./pages/QuizStudy";
 import WriteStudy from "./pages/WriteStudy";
+import MatchStudy from "./pages/MatchStudy";
+import TestStudy from "./pages/TestStudy";
 import Notes from "./pages/Notes";
 import NoteEditor from "./pages/NoteEditor";
 import AiCards from "./pages/AiCards";
@@ -62,6 +65,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/s/:code" element={<SharedSet />} />
 
         {/* Private pages. Logged-out visitors are sent to /login. */}
         <Route
@@ -120,6 +124,24 @@ export default function App() {
           element={
             <ProtectedRoute>
               <WriteStudy />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sets/:id/match"
+          element={
+            <ProtectedRoute>
+              <MatchStudy />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sets/:id/test"
+          element={
+            <ProtectedRoute>
+              <TestStudy />
             </ProtectedRoute>
           }
         />
