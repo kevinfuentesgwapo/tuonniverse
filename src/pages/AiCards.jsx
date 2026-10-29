@@ -10,7 +10,7 @@ import GenerateCardsButton from "../components/ai/GenerateCardsButton";
 
 const MIN_CHARS = 50;
 const MAX_CHARS = 20000;
-const MAX_TITLE = 100;
+const DEFAULT_NAME = "My AI cards";
 
 export default function AiCards() {
   const { user } = useAuth();
@@ -23,7 +23,7 @@ export default function AiCards() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [madeAt, setMadeAt] = useState(0);
-  const [title, setTitle] = useState("");
+  const [setName, setSetName] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const resultRef = useRef(null);
@@ -34,11 +34,8 @@ export default function AiCards() {
   const canMake = length >= MIN_CHARS && !tooLong && !noTries;
 
   // Only cards with both sides filled can be saved.
-  const goodCards = cards.filter(
-    (c) => String(c.front || "").trim() && String(c.back || "").trim(),
-  );
-  const skipped = cards.length - goodCards.length;
-  const canSave = title.trim().length > 0 && goodCards.length > 0 && !saving;
+  const saveable = cards.filter((c) => c.front.trim() && c.back.trim());
+  const skipped = cards.length - saveable.length;
 
   // After new cards arrive, bring them into view.
   useEffect(() => {
@@ -74,31 +71,31 @@ export default function AiCards() {
   function handleClear() {
     setText("");
     setCards([]);
-    setTitle("");
     setError("");
     setNotice("");
     setSaveError("");
+    setSetName("");
   }
 
   async function handleSave(e) {
     e.preventDefault();
-    if (!canSave || !user) return;
+    if (!user || saveable.length === 0 || saving) return;
     setSaveError("");
     setSaving(true);
     try {
       const setId = await createSet({
         userId: user.id,
-        title: title.trim(),
-        description: "",
-        cards: goodCards.map((c) => ({
-          term: String(c.front).trim(),
-          definition: String(c.back).trim(),
+        title: setName.trim() || DEFAULT_NAME,
+        description: "Made with AI",
+        cards: saveable.map((c) => ({
+          term: c.front.trim(),
+          definition: c.back.trim(),
         })),
       });
       navigate(`/sets/${setId}`);
     } catch {
       setSaveError(
-        "We could not save your set right now. Your cards are still here. Please try again.",
+        "Tuo could not save your set. Your cards are still here. Please try again.",
       );
       setSaving(false);
     }
@@ -193,26 +190,26 @@ export default function AiCards() {
           />
 
           <form className="ai-save" onSubmit={handleSave}>
-            <h2 className="ai-save-title">Save as a set</h2>
-            <label className="ai-paste-label" htmlFor="ai-set-title">
+            <label className="ai-paste-label" htmlFor="ai-set-name">
               Set name
             </label>
             <input
-              id="ai-set-title"
-              className="ai-save-input"
+              id="ai-set-name"
               type="text"
-              value={title}
-              maxLength={MAX_TITLE}
+              className="ai-name-input"
+              value={setName}
+              maxLength={80}
               disabled={saving}
-              placeholder="Example: Web basics"
-              onChange={(e) => setTitle(e.target.value)}
+              placeholder={DEFAULT_NAME}
+              onChange={(e) => setSetName(e.target.value)}
             />
 
             {skipped > 0 && (
               <p className="ai-note">
                 {skipped === 1
-                  ? "1 card has an empty side, so we will skip it."
-                  : `${skipped} cards have an empty side, so we will skip them.`}
+                  ? "1 card has an empty side, so it will be skipped."
+                  : `${skipped} cards have an empty side, so they will be skipped.`}{" "}
+                Fill them in to keep them.
               </p>
             )}
             {saveError && (
@@ -225,18 +222,15 @@ export default function AiCards() {
               <button
                 type="submit"
                 className="btn btn-primary ai-save-btn"
-                disabled={!canSave}
+                disabled={saving || saveable.length === 0}
               >
                 {saving
                   ? "Saving…"
-                  : `Save ${goodCards.length} ${
-                      goodCards.length === 1 ? "card" : "cards"
-                    } as a set`}
+                  : saveable.length === 1
+                    ? "Save 1 card as a set"
+                    : `Save ${saveable.length} cards as a set`}
               </button>
             </div>
-            {!title.trim() && goodCards.length > 0 && (
-              <p className="muted">Give your set a name, then save.</p>
-            )}
           </form>
         </div>
       )}
