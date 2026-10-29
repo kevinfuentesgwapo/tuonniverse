@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import SetEditor from "./pages/SetEditor";
 import Sets from "./pages/Sets";
 import SetView from "./pages/SetView";
@@ -60,6 +61,7 @@ export default function App() {
         {/* Public pages. */}
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
 
         {/* Private pages. Logged-out visitors are sent to /login. */}
         <Route

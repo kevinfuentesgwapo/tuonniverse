@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Icon from "../components/ui/Icon";
 
 // Your public contact email. Shown on the page.
@@ -137,6 +137,9 @@ export default function Privacy() {
         <p>
           We are happy to help. Write to{" "}
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        </p>
+        <p className="muted">
+          You can also read our <Link to="/terms">terms of use</Link>.
         </p>
       </section>
     </main>

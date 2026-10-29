@@ -7,6 +7,12 @@ import Logo from "../components/brand/Logo";
 
 const AFTER_KEY = "tuoniverse-after-login";
 
+// Email + password login is OFF for now.
+// Supabase's free email sender only reaches our own team, so sign-up and
+// reset emails would not arrive for students. Turn this on when we have
+// our own email sender. Google and Facebook login work without email.
+const EMAIL_LOGIN = false;
+
 // Only allow paths inside our own app (safety).
 const safePath = (p) =>
   typeof p === "string" && p.startsWith("/") && !p.startsWith("//") ? p : "/";
@@ -320,136 +326,144 @@ export default function Login() {
                 <FacebookIcon /> Continue with Facebook
               </button>
             </div>
-            <div className="divider" role="separator">
-              <span>or</span>
-            </div>
+            {EMAIL_LOGIN ? (
+              <div className="divider" role="separator">
+                <span>or</span>
+              </div>
+            ) : (
+              <p className="muted">Email sign-up is coming soon.</p>
+            )}
           </>
         )}
 
-        <form onSubmit={handleSubmit} className="form" aria-busy={busy}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            required
-            autoComplete="email"
-            inputMode="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        {EMAIL_LOGIN && (
+          <form onSubmit={handleSubmit} className="form" aria-busy={busy}>
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-          {mode !== "forgot" && (
-            <>
-              <label htmlFor="password">Password</label>
-              <div className="password-wrap">
-                <input
-                  id="password"
-                  type={showPw ? "text" : "password"}
-                  required
-                  minLength={6}
-                  autoComplete={
-                    mode === "login" ? "current-password" : "new-password"
-                  }
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="show-btn"
-                  onClick={() => setShowPw(!showPw)}
-                  aria-pressed={showPw}
-                  aria-label="Show password"
-                >
-                  {showPw ? "Hide" : "Show"}
-                </button>
-              </div>
-              {mode === "signup" && (
-                <p className="hint">Use at least 8 characters.</p>
-              )}
-              {mode === "login" && (
-                <div className="forgot-row">
+            {mode !== "forgot" && (
+              <>
+                <label htmlFor="password">Password</label>
+                <div className="password-wrap">
+                  <input
+                    id="password"
+                    type={showPw ? "text" : "password"}
+                    required
+                    minLength={6}
+                    autoComplete={
+                      mode === "login" ? "current-password" : "new-password"
+                    }
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                   <button
                     type="button"
-                    className="link-button"
-                    onClick={() => changeMode("forgot")}
+                    className="show-btn"
+                    onClick={() => setShowPw(!showPw)}
+                    aria-pressed={showPw}
+                    aria-label="Show password"
                   >
-                    Forgot password?
+                    {showPw ? "Hide" : "Show"}
                   </button>
                 </div>
-              )}
-            </>
-          )}
+                {mode === "signup" && (
+                  <p className="hint">Use at least 8 characters.</p>
+                )}
+                {mode === "login" && (
+                  <div className="forgot-row">
+                    <button
+                      type="button"
+                      className="link-button"
+                      onClick={() => changeMode("forgot")}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
 
-          {error && (
-            <p className="form-error" role="alert">
-              {error}
-            </p>
-          )}
-          {message && (
-            <p className="form-message" role="status">
-              {message}
-            </p>
-          )}
+            {error && (
+              <p className="form-error" role="alert">
+                {error}
+              </p>
+            )}
+            {message && (
+              <p className="form-message" role="status">
+                {message}
+              </p>
+            )}
 
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={busy || waiting}
-          >
-            {busy
-              ? "Please wait…"
-              : waiting
-                ? `Wait ${cooldown}s`
-                : text.button}
-          </button>
-
-          {canResend && mode !== "forgot" && (
             <button
-              type="button"
-              className="btn"
-              onClick={handleResend}
-              disabled={busy || cooldown > 0}
+              className="btn btn-primary"
+              type="submit"
+              disabled={busy || waiting}
             >
-              {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend email"}
+              {busy
+                ? "Please wait…"
+                : waiting
+                  ? `Wait ${cooldown}s`
+                  : text.button}
             </button>
-          )}
-        </form>
 
-        <p className="muted">
-          {mode === "login" && (
-            <>
-              New here?{" "}
+            {canResend && mode !== "forgot" && (
               <button
-                className="link-button"
                 type="button"
-                onClick={() => changeMode("signup")}
+                className="btn"
+                onClick={handleResend}
+                disabled={busy || cooldown > 0}
               >
-                Create an account
+                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend email"}
               </button>
-            </>
-          )}
-          {mode === "signup" && (
-            <>
-              Already have an account?{" "}
+            )}
+          </form>
+        )}
+
+        {EMAIL_LOGIN && (
+          <p className="muted">
+            {mode === "login" && (
+              <>
+                New here?{" "}
+                <button
+                  className="link-button"
+                  type="button"
+                  onClick={() => changeMode("signup")}
+                >
+                  Create an account
+                </button>
+              </>
+            )}
+            {mode === "signup" && (
+              <>
+                Already have an account?{" "}
+                <button
+                  className="link-button"
+                  type="button"
+                  onClick={() => changeMode("login")}
+                >
+                  Log in
+                </button>
+              </>
+            )}
+            {mode === "forgot" && (
               <button
                 className="link-button"
                 type="button"
                 onClick={() => changeMode("login")}
               >
-                Log in
+                Back to log in
               </button>
-            </>
-          )}
-          {mode === "forgot" && (
-            <button
-              className="link-button"
-              type="button"
-              onClick={() => changeMode("login")}
-            >
-              Back to log in
-            </button>
-          )}
-        </p>
+            )}
+          </p>
+        )}
 
         <p className="muted terms">
           By continuing, you agree to use Tuoniverse for studying and not to
