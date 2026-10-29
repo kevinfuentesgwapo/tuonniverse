@@ -1,0 +1,122 @@
+/* TOP BAR SEARCH. The box itself uses .topbar-search from shell.css. */
+
+.topbar-search input {
+  padding-right: 44px;
+}
+.topbar-search input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.search-key {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  padding: 1px 8px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* ---------- Drop-down ---------- */
+.search-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  max-height: min(420px, 70vh);
+  padding: 6px;
+  overflow-y: auto;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--bg) 40%, transparent);
+}
+.search-hint,
+.search-empty p {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--muted);
+}
+.search-empty {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding-bottom: 8px;
+}
+.search-empty .btn {
+  margin: 0 12px 4px;
+}
+.search-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 0 12px 4px;
+}
+.search-link {
+  font-weight: 700;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+.search-link:hover {
+  text-decoration: underline;
+}
+
+.search-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.search-group {
+  padding: 8px 12px 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.search-item.is-active {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.search-tag {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent-strong);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.search-text {
+  display: grid;
+  min-width: 0;
+}
+.search-title {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.search-sub {
+  overflow: hidden;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

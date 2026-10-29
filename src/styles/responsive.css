@@ -1,0 +1,106 @@
+/* PHONE AND SMALL-SCREEN FIXES
+   Loaded after shell.css and search.css, before sparkle.css.
+   Phone = 700px wide or less. Small phone = 520px or less. */
+
+/* ---------- Safety net for every screen size ---------- */
+img,
+svg {
+  max-width: 100%;
+}
+.shell {
+  max-width: 100%;
+  overflow-x: clip; /* nothing can push the page sideways */
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 700px) {
+  /* Bigger tap targets, and no zoom-in when typing on iPhones */
+  .btn {
+    min-height: 44px;
+  }
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1rem);
+  }
+
+  /* Top bar: smaller gaps so everything fits */
+  .topbar {
+    gap: 8px;
+    padding: 8px 10px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  .topbar-actions {
+    gap: 8px;
+    min-width: 0;
+  }
+  .streak-chip {
+    padding: 0 10px;
+  }
+  .create-btn {
+    padding-inline: 14px;
+  }
+
+  /* Menus: a neat sheet under the top bar, never cut off */
+  .menu-wrap {
+    position: static;
+  }
+  .menu {
+    top: calc(100% + 6px);
+    right: 10px;
+    left: 10px;
+    min-width: 0;
+  }
+  .menu-item {
+    min-height: 48px;
+  }
+
+  /* Bottom tab bar: room for the phone's own bottom edge */
+  .sidebar {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .shell-content {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+  /* The Save bars on set and note pages sit above the tab bar */
+  .set-savebar {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  /* Calmer background: fewer shapes, softer, and no movement */
+  body::before {
+    -webkit-mask-size: 340px 340px;
+    mask-size: 340px 340px;
+    opacity: 0.16;
+    animation: none;
+  }
+  body::after {
+    -webkit-mask-size: 440px 440px;
+    mask-size: 440px 440px;
+    opacity: 0.1;
+    animation: none;
+  }
+  [data-theme="light"] body::before {
+    opacity: 0.45;
+  }
+  [data-theme="light"] body::after {
+    opacity: 0.1;
+  }
+
+  /* Fainter dots inside cards so text stays easy to read */
+  html:root {
+    --deco-dot: color-mix(in srgb, var(--accent) 12%, transparent);
+    --deco-dot-soft: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+  html:root[data-theme="light"] {
+    --deco-dot: color-mix(in srgb, var(--accent) 30%, transparent);
+    --deco-dot-soft: color-mix(in srgb, var(--accent) 20%, transparent);
+  }
+}
+
+/* ---------- Small phones: show only the planet in the top bar ---------- */
+@media (max-width: 520px) {
+  .topbar-logo .logo-text {
+    display: none;
+  }
+}

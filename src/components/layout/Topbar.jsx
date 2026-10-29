@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../brand/Logo";
 import Icon from "../ui/Icon";
+import SearchBox from "./SearchBox";
 import useAuth from "../../hooks/useAuth";
 import useStudyProgress from "../../hooks/useStudyProgress";
 import { supabase } from "../../lib/supabase";
@@ -77,15 +78,7 @@ export default function Topbar({ theme, onToggleTheme }) {
         <Logo />
       </div>
 
-      <div className="topbar-search">
-        <Icon name="search" size={18} />
-        <input
-          type="search"
-          placeholder="Search your sets (coming soon)"
-          aria-label="Search your sets"
-          disabled
-        />
-      </div>
+      <SearchBox />
 
       <div className="topbar-actions">
         <div className="menu-wrap" ref={createRef}>
