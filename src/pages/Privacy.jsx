@@ -3,8 +3,8 @@ import { useLocation } from "react-router-dom";
 import Icon from "../components/ui/Icon";
 
 // Your public contact email. Shown on the page.
-const CONTACT_EMAIL = "your-email@example.com";
-const LAST_UPDATED = "October 27, 2026";
+const CONTACT_EMAIL = "tuoniverse@gmail.com";
+const LAST_UPDATED = "October 29, 2026";
 
 // Three happy promises shown at the top.
 const PROMISES = [
