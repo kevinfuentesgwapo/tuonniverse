@@ -1,16 +1,20 @@
-// /ai : paste text, Tuo makes cards, you check them, then save them as a set.
+// /ai : add notes (paste or upload a file), then Tuo makes flashcards or study notes.
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useAiUsage from "../hooks/useAiUsage";
 import { createSet } from "../hooks/useSets";
-import { generateCardsFromText } from "../lib/api";
+import { createNote } from "../hooks/useNotes";
+import { generateCardsFromText, summarizeText } from "../lib/api";
+import { ACCEPT, readFileText } from "../lib/readFile";
 import CardPreview, { addIds } from "../components/ai/CardPreview";
 import GenerateCardsButton from "../components/ai/GenerateCardsButton";
+import NotesPreview from "../components/ai/NotesPreview";
 
 const MIN_CHARS = 50;
 const MAX_CHARS = 20000;
 const DEFAULT_NAME = "My AI cards";
+const DEFAULT_NOTE_TITLE = "Study notes";
 
 export default function AiCards() {
   const { user } = useAuth();
@@ -26,8 +30,21 @@ export default function AiCards() {
   const [setName, setSetName] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const resultRef = useRef(null);
+  const [reading, setReading] = useState(false);
+  const [fileMsg, setFileMsg] = useState("");
+  const [fileError, setFileError] = useState("");
 
+  // Study notes (summary) state.
+  const [summarizing, setSummarizing] = useState(false);
+  const [summary, setSummary] = useState(null); // { title, content } or null
+  const [summaryAt, setSummaryAt] = useState(0);
+  const [savingNote, setSavingNote] = useState(false);
+  const [noteError, setNoteError] = useState("");
+
+  const resultRef = useRef(null);
+  const notesRef = useRef(null);
+
+  const working = busy || summarizing || saving || savingNote || reading;
   const length = text.trim().length;
   const tooLong = length > MAX_CHARS;
   const noTries = !usage.loading && usage.left <= 0;
@@ -37,10 +54,42 @@ export default function AiCards() {
   const saveable = cards.filter((c) => c.front.trim() && c.back.trim());
   const skipped = cards.length - saveable.length;
 
-  // After new cards arrive, bring them into view.
+  // After new cards or notes arrive, bring them into view.
   useEffect(() => {
     if (madeAt) resultRef.current?.scrollIntoView({ block: "start" });
   }, [madeAt]);
+  useEffect(() => {
+    if (summaryAt) notesRef.current?.scrollIntoView({ block: "start" });
+  }, [summaryAt]);
+
+  function handleAiError(err) {
+    setError(err.message);
+    if (err.status === 429 && typeof err.used === "number") {
+      usage.setUsed(err.used, err.limit);
+    }
+  }
+
+  async function handleFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // lets the same file be picked again later
+    if (!file) return;
+    setFileMsg("");
+    setFileError("");
+    setReading(true);
+    try {
+      const { text: fileText, truncated } = await readFileText(file);
+      setText(fileText);
+      setFileMsg(
+        truncated
+          ? `Loaded ${file.name}. It was long, so Tuo will use the first part. You can edit the text below.`
+          : `Loaded ${file.name}. You can edit the text below before making cards.`,
+      );
+    } catch (err) {
+      setFileError(err.message);
+    } finally {
+      setReading(false);
+    }
+  }
 
   async function handleMake() {
     setError("");
@@ -59,21 +108,48 @@ export default function AiCards() {
         setMadeAt(Date.now());
       }
     } catch (err) {
-      setError(err.message);
-      if (err.status === 429 && typeof err.used === "number") {
-        usage.setUsed(err.used, err.limit);
-      }
+      handleAiError(err);
     } finally {
       setBusy(false);
     }
   }
 
+  async function handleSummarize() {
+    setError("");
+    setNotice("");
+    setNoteError("");
+    setSummarizing(true);
+    try {
+      const result = await summarizeText(text.trim());
+      usage.setUsed(result.used, result.limit);
+      if (!result.content) {
+        setNotice(
+          "Tuo could not make notes from that text. Try text with more facts or ideas.",
+        );
+      } else {
+        setSummary({
+          title: result.title || DEFAULT_NOTE_TITLE,
+          content: result.content,
+        });
+        setSummaryAt(Date.now());
+      }
+    } catch (err) {
+      handleAiError(err);
+    } finally {
+      setSummarizing(false);
+    }
+  }
+
   function handleClear() {
+    setFileMsg("");
+    setFileError("");
     setText("");
     setCards([]);
+    setSummary(null);
     setError("");
     setNotice("");
     setSaveError("");
+    setNoteError("");
     setSetName("");
   }
 
@@ -101,19 +177,71 @@ export default function AiCards() {
     }
   }
 
+  async function handleSaveNote() {
+    if (!user || !summary || savingNote) return;
+    const content = summary.content.trim();
+    if (!content) {
+      setNoteError("Add some text to your notes first.");
+      return;
+    }
+    setNoteError("");
+    setSavingNote(true);
+    try {
+      await createNote({
+        userId: user.id,
+        title: summary.title.trim() || DEFAULT_NOTE_TITLE,
+        content,
+      });
+      navigate("/notes");
+    } catch {
+      setNoteError(
+        "Tuo could not save your notes. Your text is still here. Please try again.",
+      );
+      setSavingNote(false);
+    }
+  }
+
   return (
     <main className="sets-page ai-page">
       <header className="sets-head">
         <div>
           <h1>Make cards with AI</h1>
           <p className="muted">
-            Paste your notes. Tuo turns them into flashcards. You can fix them
-            before saving.
+            Paste your notes or upload a file. Tuo turns them into flashcards or
+            study notes. You can fix them before saving.
           </p>
         </div>
       </header>
 
-      <section className="ai-paste" aria-label="Paste your notes">
+      <section className="ai-paste" aria-label="Add your notes">
+        <div className="ai-file">
+          <input
+            id="ai-file"
+            className="ai-file-input"
+            type="file"
+            accept={ACCEPT}
+            onChange={handleFile}
+            disabled={working}
+          />
+          <label className="btn ai-file-btn" htmlFor="ai-file">
+            {reading ? "Reading your file…" : "Upload a file"}
+          </label>
+          <span className="muted">
+            .pptx, .docx or .pdf. Your file stays on your device. Only the text
+            is used.
+          </span>
+        </div>
+        {fileMsg && (
+          <p className="ai-note" aria-live="polite">
+            {fileMsg}
+          </p>
+        )}
+        {fileError && (
+          <p className="ai-error" role="alert">
+            {fileError}
+          </p>
+        )}
+
         <label className="ai-paste-label" htmlFor="ai-text">
           Your notes
         </label>
@@ -121,7 +249,7 @@ export default function AiCards() {
           id="ai-text"
           rows={9}
           value={text}
-          disabled={busy || saving}
+          disabled={working}
           placeholder="Paste a chapter, a list of terms, or your class notes here."
           onChange={(e) => setText(e.target.value)}
         />
@@ -165,15 +293,23 @@ export default function AiCards() {
           <GenerateCardsButton
             onClick={handleMake}
             busy={busy}
-            disabled={!canMake || saving}
+            disabled={!canMake || working}
             hasCards={cards.length > 0}
           />
-          {(text || cards.length > 0) && (
+          <button
+            type="button"
+            className="btn ai-notes-btn"
+            onClick={handleSummarize}
+            disabled={!canMake || working}
+          >
+            {summarizing ? "Writing notes…" : "Summarize to Notes"}
+          </button>
+          {(text || cards.length > 0 || summary) && (
             <button
               type="button"
               className="btn"
               onClick={handleClear}
-              disabled={busy || saving}
+              disabled={working}
             >
               Clear
             </button>
@@ -183,11 +319,7 @@ export default function AiCards() {
 
       {cards.length > 0 && (
         <div className="ai-result" ref={resultRef}>
-          <CardPreview
-            cards={cards}
-            onChange={setCards}
-            disabled={busy || saving}
-          />
+          <CardPreview cards={cards} onChange={setCards} disabled={working} />
 
           <form className="ai-save" onSubmit={handleSave}>
             <label className="ai-paste-label" htmlFor="ai-set-name">
@@ -199,7 +331,7 @@ export default function AiCards() {
               className="ai-name-input"
               value={setName}
               maxLength={80}
-              disabled={saving}
+              disabled={working}
               placeholder={DEFAULT_NAME}
               onChange={(e) => setSetName(e.target.value)}
             />
@@ -222,7 +354,7 @@ export default function AiCards() {
               <button
                 type="submit"
                 className="btn btn-primary ai-save-btn"
-                disabled={saving || saveable.length === 0}
+                disabled={working || saveable.length === 0}
               >
                 {saving
                   ? "Saving…"
@@ -232,6 +364,21 @@ export default function AiCards() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {summary && (
+        <div className="ai-result" ref={notesRef}>
+          <NotesPreview
+            title={summary.title}
+            content={summary.content}
+            onTitle={(title) => setSummary((s) => ({ ...s, title }))}
+            onContent={(content) => setSummary((s) => ({ ...s, content }))}
+            onSave={handleSaveNote}
+            saving={savingNote}
+            error={noteError}
+            disabled={working}
+          />
         </div>
       )}
     </main>

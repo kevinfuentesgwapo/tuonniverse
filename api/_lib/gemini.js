@@ -12,74 +12,102 @@ const MODELS = [
 
 const TRY_NEXT = [404, 429, 503];
 
-async function callModel(model, key, prompt) {
-  return fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "ARRAY",
-            items: {
-              type: "OBJECT",
-              properties: {
-                front: { type: "STRING" },
-                back: { type: "STRING" },
-              },
-              required: ["front", "back"],
-            },
-          },
-        },
-      }),
-    },
-  );
-}
-
-export async function generateCards(text, count) {
+// Sends one prompt, asks for JSON in the given shape, returns the parsed JSON.
+async function askGemini(prompt, schema) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("missing-key");
-
-  const prompt =
-    `Make up to ${count} study flashcards from the text below.\n` +
-    'Each card: a short "front" (question or term) and a clear "back" (answer, 1-2 sentences).\n' +
-    "Use only facts from the text. Use the same language as the text. No duplicates.\n\n" +
-    `TEXT:\n${text}`;
 
   let res = null;
   let lastStatus = 0;
 
   for (const model of MODELS) {
-    res = await callModel(model, key, prompt);
+    res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: schema,
+          },
+        }),
+      },
+    );
     if (res.ok) break;
     lastStatus = res.status;
-    console.error(`generate-cards: model ${model} failed with ${res.status}`);
+    console.error(`gemini: model ${model} failed with ${res.status}`);
     if (!TRY_NEXT.includes(res.status)) break;
   }
 
   if (!res || !res.ok) throw new Error("gemini-" + lastStatus);
 
   const data = await res.json();
-  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-  let list;
+  const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!raw) return null;
   try {
-    list = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch {
     throw new Error("bad-json");
   }
+}
+
+const clean = (value, max) =>
+  String(value || "")
+    .trim()
+    .slice(0, max);
+
+export async function generateCards(text, count) {
+  const prompt =
+    `Make up to ${count} study flashcards from the text below.\n` +
+    'Each card: a short "front" (question or term) and a clear "back" (answer, 1-2 sentences).\n' +
+    "Use only facts from the text. Use the same language as the text. No duplicates.\n\n" +
+    `TEXT:\n${text}`;
+
+  const list = await askGemini(prompt, {
+    type: "ARRAY",
+    items: {
+      type: "OBJECT",
+      properties: {
+        front: { type: "STRING" },
+        back: { type: "STRING" },
+      },
+      required: ["front", "back"],
+    },
+  });
 
   return (Array.isArray(list) ? list : [])
-    .map((c) => ({
-      front: String(c.front || "")
-        .trim()
-        .slice(0, 500),
-      back: String(c.back || "")
-        .trim()
-        .slice(0, 1000),
-    }))
+    .map((c) => ({ front: clean(c?.front, 500), back: clean(c?.back, 1000) }))
     .filter((c) => c.front && c.back)
     .slice(0, count);
+}
+
+// Short study notes in plain text (the Notes page shows plain text only).
+// Returns { title, content }. Both are "" if Gemini gave nothing useful.
+export async function summarizeText(text) {
+  const prompt =
+    "Write clear study notes from the text below, for a student.\n" +
+    'Give a short "title" (under 8 words) and the "notes".\n' +
+    "Notes rules: plain text only. Put each short heading on its own line. " +
+    'Put each key point on its own line starting with "- ". ' +
+    "Do not use markdown symbols like #, *, or **. " +
+    "Keep important terms, names, dates, and numbers. " +
+    "Use only facts from the text. Use the same language as the text. " +
+    "Keep it under about 400 words.\n\n" +
+    `TEXT:\n${text}`;
+
+  const out = await askGemini(prompt, {
+    type: "OBJECT",
+    properties: {
+      title: { type: "STRING" },
+      notes: { type: "STRING" },
+    },
+    required: ["title", "notes"],
+  });
+
+  return {
+    title: clean(out?.title, 120),
+    content: clean(out?.notes, 8000),
+  };
 }

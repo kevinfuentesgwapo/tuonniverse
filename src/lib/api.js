@@ -3,9 +3,9 @@ import { supabase } from "./supabase.js";
 
 export const AI_LIMIT_FALLBACK = 5;
 
-// Sends pasted text to the server. Returns { cards, used, limit }.
+// Sends text to one of our /api functions. Returns the parsed JSON body.
 // Throws an Error with a friendly message (error.status = HTTP code).
-export async function generateCardsFromText(text) {
+async function postAi(path, text) {
   const { data } = await supabase.auth.getSession();
   const token = data?.session?.access_token;
   if (!token) {
@@ -16,7 +16,7 @@ export async function generateCardsFromText(text) {
 
   let res;
   try {
-    res = await fetch("/api/generate-cards", {
+    res = await fetch(path, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,8 +50,26 @@ export async function generateCardsFromText(text) {
     throw err;
   }
 
+  return body;
+}
+
+// Pasted text -> flashcards. Returns { cards, used, limit }.
+export async function generateCardsFromText(text) {
+  const body = await postAi("/api/generate-cards", text);
   return {
     cards: Array.isArray(body.cards) ? body.cards : [],
+    used: body.used ?? 0,
+    limit: body.limit ?? AI_LIMIT_FALLBACK,
+  };
+}
+
+// Pasted text -> short study notes. Returns { title, content, used, limit }.
+// title and content are "" when Tuo found nothing to write.
+export async function summarizeText(text) {
+  const body = await postAi("/api/summarize", text);
+  return {
+    title: typeof body.title === "string" ? body.title : "",
+    content: typeof body.content === "string" ? body.content : "",
     used: body.used ?? 0,
     limit: body.limit ?? AI_LIMIT_FALLBACK,
   };
