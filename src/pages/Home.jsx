@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useSets from "../hooks/useSets";
 import useStudyProgress from "../hooks/useStudyProgress";
+import useDueToday from "../hooks/useDueToday";
+import useAiUsage from "../hooks/useAiUsage";
 import Icon from "../components/ui/Icon";
 import SetTile from "../components/flashcards/SetTile";
 import FocusTimer from "../components/home/FocusTimer";
@@ -63,8 +65,10 @@ const LAUNCH_PAD = [
   {
     icon: "sparkles",
     tone: "yellow",
+    id: "ai",
     title: "Generate with AI",
     text: "Turn text or files into cards fast.",
+    to: "/ai",
   },
 ];
 
@@ -233,6 +237,8 @@ function LoggedInHome({ user }) {
     totalCards,
   } = useSets();
   const progress = useStudyProgress();
+  const due = useDueToday();
+  const aiUsage = useAiUsage(user.id);
   const [taps, setTaps] = useState(0);
   const [mood, setMood] = useState(null);
   const [tipIndex, setTipIndex] = useState(new Date().getDate() % TIPS.length);
@@ -266,6 +272,34 @@ function LoggedInHome({ user }) {
           ? `/sets/${lastSet.id}`
           : `/sets/${lastSet.id}/${lastMode.path}`
       : null;
+
+  // "Cards due today" (spaced repetition). Friendly, never guilty.
+  const hasDue = due.dueTotal > 0;
+  const hasNew = due.newTotal > 0;
+  const cardWord = (n) => (n === 1 ? "card" : "cards");
+  let reviewTitle = "All caught up!";
+  let reviewNote =
+    "Nothing to review today. Come back tomorrow, or make a new set.";
+  let reviewButton = "";
+  if (hasDue) {
+    reviewTitle = `${due.dueTotal} ${cardWord(due.dueTotal)} ready to review`;
+    reviewNote = hasNew
+      ? `Plus ${due.newTotal} new ${cardWord(due.newTotal)} to learn. Today's round: ${due.sessionSize} cards.`
+      : `Today's round: ${due.sessionSize} ${cardWord(due.sessionSize)}.`;
+    reviewButton = "Start review";
+  } else if (hasNew) {
+    reviewTitle = "Nothing due. Nice!";
+    reviewNote = `${due.newTotal} new ${cardWord(due.newTotal)} waiting when you feel ready.`;
+    reviewButton = "Learn new cards";
+  }
+
+  // AI tries left today.
+  const aiLeftText =
+    aiUsage.loading || aiUsage.error
+      ? ""
+      : aiUsage.left > 0
+        ? `${aiUsage.left} of ${aiUsage.limit} AI tries left today`
+        : "No AI tries left today. They refill tomorrow.";
 
   // Daily goal ring.
   const goalShare = Math.min(1, progress.cardsToday / GOAL_CARDS);
@@ -309,6 +343,35 @@ function LoggedInHome({ user }) {
             />
           </button>
         </section>
+
+        {sets.length > 0 && (
+          <section className="home-review" aria-label="Cards due today">
+            {due.loading ? (
+              <p className="muted" aria-live="polite">
+                Checking your cards…
+              </p>
+            ) : due.error ? (
+              <p className="muted">
+                We could not check your cards just now. Refresh to try again.
+              </p>
+            ) : (
+              <>
+                <div className="home-review-count" aria-hidden="true">
+                  {hasDue ? due.dueTotal : "✓"}
+                </div>
+                <div className="home-review-text">
+                  <h2 className="home-quests-title">{reviewTitle}</h2>
+                  <p className="muted">{reviewNote}</p>
+                </div>
+                {reviewButton && (
+                  <Link to="/review" className="btn btn-primary">
+                    {reviewButton}
+                  </Link>
+                )}
+              </>
+            )}
+          </section>
+        )}
 
         {continueTo && (
           <section className="home-quests" aria-label="Continue studying">
@@ -371,7 +434,9 @@ function LoggedInHome({ user }) {
                 </span>
                 <span>{quest.text}</span>
                 {!quest.done && quest.id === "ai" && (
-                  <span className="home-badge">Soon</span>
+                  <Link to="/ai" className="home-go">
+                    Start
+                  </Link>
                 )}
                 {!quest.done && quest.id === "set" && (
                   <Link to="/sets/new" className="home-go">
@@ -399,6 +464,9 @@ function LoggedInHome({ user }) {
                   </span>
                   <h3>{tool.title}</h3>
                   <p className="muted">{tool.text}</p>
+                  {tool.id === "ai" && aiLeftText && (
+                    <p className="home-tile-note">{aiLeftText}</p>
+                  )}
                   {tool.to ? (
                     <span className="home-go">Open →</span>
                   ) : (

@@ -12,6 +12,7 @@ import WriteStudy from "./pages/WriteStudy";
 import Notes from "./pages/Notes";
 import NoteEditor from "./pages/NoteEditor";
 import AiCards from "./pages/AiCards";
+import Review from "./pages/Review";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import AppShell from "./components/layout/AppShell";
@@ -151,6 +152,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AiCards />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/review"
+          element={
+            <ProtectedRoute>
+              <Review />
             </ProtectedRoute>
           }
         />

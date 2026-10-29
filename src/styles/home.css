@@ -1,6 +1,6 @@
 /* ---------- Shared bits ---------- */
 .tone-violet {
-  --tone: var(--accent);
+  --tone: var(--violet);
 }
 .tone-cyan {
   --tone: var(--cyan);
@@ -503,6 +503,45 @@
 }
 .home-tip-btn:hover {
   text-decoration: underline;
+}
+
+/* ---------- Cards due today ---------- */
+.home-review {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+}
+.home-review-count {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-text);
+  background: var(--accent);
+}
+.home-review-text {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.home-review-text h2,
+.home-review-text p {
+  margin: 0;
+}
+.home-tile-note {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-strong);
 }
 
 /* ---------- Motion ---------- */
