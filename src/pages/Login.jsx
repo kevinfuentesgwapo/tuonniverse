@@ -164,7 +164,13 @@ export default function Login() {
     try {
       const { error: err } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}/login` },
+        options: {
+          redirectTo: `${window.location.origin}/login`,
+          // Google: always show "Choose an account" (safe on shared computers).
+          ...(provider === "google"
+            ? { queryParams: { prompt: "select_account" } }
+            : {}),
+        },
       });
       if (err) throw err;
       // On success the browser leaves this page.
