@@ -4,6 +4,7 @@ import useAuth from "../hooks/useAuth";
 import useSets from "../hooks/useSets";
 import useStudyProgress from "../hooks/useStudyProgress";
 import useDueToday from "../hooks/useDueToday";
+import useNotes from "../hooks/useNotes";
 import useAiUsage from "../hooks/useAiUsage";
 import Icon from "../components/ui/Icon";
 import SetTile from "../components/flashcards/SetTile";
@@ -61,6 +62,7 @@ const LAUNCH_PAD = [
     tone: "cyan",
     title: "New note",
     text: "Write notes or keep summaries in one place.",
+    to: "/notes/new",
   },
   {
     icon: "sparkles",
@@ -77,6 +79,7 @@ const LAUNCH_PAD = [
 const QUESTS = [
   { id: "join", text: "Join Tuoniverse", done: true },
   { id: "set", text: "Make your first set", done: false },
+  { id: "note", text: "Write your first note", done: false },
   { id: "ai", text: "Try AI flashcards", done: false },
   { id: "study", text: "Finish a study round", done: false },
 ];
@@ -237,6 +240,7 @@ function LoggedInHome({ user }) {
     totalCards,
   } = useSets();
   const progress = useStudyProgress();
+  const { notes } = useNotes();
   const due = useDueToday();
   const aiUsage = useAiUsage(user.id);
   const [taps, setTaps] = useState(0);
@@ -249,6 +253,7 @@ function LoggedInHome({ user }) {
 
   const quests = QUESTS.map((quest) => {
     if (quest.id === "set") return { ...quest, done: sets.length > 0 };
+    if (quest.id === "note") return { ...quest, done: notes.length > 0 };
     if (quest.id === "study") return { ...quest, done: progress.hasStudied };
     return quest;
   });
@@ -440,6 +445,11 @@ function LoggedInHome({ user }) {
                 )}
                 {!quest.done && quest.id === "set" && (
                   <Link to="/sets/new" className="home-go">
+                    Start
+                  </Link>
+                )}
+                {!quest.done && quest.id === "note" && (
+                  <Link to="/notes/new" className="home-go">
                     Start
                   </Link>
                 )}
