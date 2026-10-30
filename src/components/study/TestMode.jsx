@@ -6,7 +6,6 @@ import {
   gradeQuestion,
   isAnswered,
 } from "../../lib/testQuestions";
-import "../../styles/test.css";
 
 // Confetti bits for the "all done" screen. Fixed values, nothing random.
 const BITS = Array.from({ length: 16 }, (_, i) => ({

@@ -6,6 +6,7 @@ import useStudyProgress from "../hooks/useStudyProgress";
 import useDueToday from "../hooks/useDueToday";
 import useNotes from "../hooks/useNotes";
 import useAiUsage from "../hooks/useAiUsage";
+import useSettings from "../hooks/useSettings";
 import Icon from "../components/ui/Icon";
 import SetTile from "../components/flashcards/SetTile";
 import FocusTimer from "../components/home/FocusTimer";
@@ -156,7 +157,6 @@ const DONE_DOT = {
 };
 
 // Daily goal ring. Fills as you finish cards today.
-const GOAL_CARDS = 10;
 const GOAL_RADIUS = 26;
 const GOAL_CIRCLE = 2 * Math.PI * GOAL_RADIUS;
 
@@ -245,6 +245,8 @@ function LoggedInHome({ user }) {
   const { notes } = useNotes();
   const due = useDueToday();
   const aiUsage = useAiUsage(user.id);
+  const { settings } = useSettings();
+  const goalCards = settings.dailyGoal;
   const [taps, setTaps] = useState(0);
   const [mood, setMood] = useState(null);
   const [tipIndex, setTipIndex] = useState(new Date().getDate() % TIPS.length);
@@ -311,8 +313,8 @@ function LoggedInHome({ user }) {
         : "No AI tries left today. They refill tomorrow.";
 
   // Daily goal ring.
-  const goalShare = Math.min(1, progress.cardsToday / GOAL_CARDS);
-  const goalLeft = Math.max(0, GOAL_CARDS - progress.cardsToday);
+  const goalShare = Math.min(1, progress.cardsToday / goalCards);
+  const goalLeft = Math.max(0, goalCards - progress.cardsToday);
   const goalText =
     goalLeft === 0
       ? "Daily goal done. Amazing!"
@@ -607,7 +609,7 @@ function LoggedInHome({ user }) {
             </svg>
             <div>
               <strong>
-                {progress.cardsToday} / {GOAL_CARDS}
+                {progress.cardsToday} / {goalCards}
               </strong>
               <p className="muted">{goalText}</p>
             </div>

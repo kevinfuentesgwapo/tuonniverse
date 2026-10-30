@@ -81,6 +81,16 @@ export default function Topbar({ theme, onToggleTheme }) {
       <SearchBox />
 
       <div className="topbar-actions">
+        {/* Phones only: the search box is hidden there, so this opens /search. */}
+        <Link
+          to="/search"
+          className="theme-btn topbar-search-btn"
+          aria-label="Search your sets and notes"
+          title="Search"
+        >
+          <Icon name="search" size={20} />
+        </Link>
+
         <div className="menu-wrap" ref={createRef}>
           <button
             type="button"
@@ -162,6 +172,15 @@ export default function Topbar({ theme, onToggleTheme }) {
                 <strong>{name}</strong>
                 <span className="muted">{user?.email}</span>
               </div>
+              <Link
+                to="/settings"
+                className="menu-item"
+                role="menuitem"
+                onClick={() => setOpenMenu(null)}
+              >
+                <Icon name="target" size={18} />
+                Settings
+              </Link>
               <button
                 type="button"
                 className="menu-item"

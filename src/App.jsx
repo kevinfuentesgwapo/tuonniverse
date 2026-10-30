@@ -17,12 +17,15 @@ import Notes from "./pages/Notes";
 import NoteEditor from "./pages/NoteEditor";
 import AiCards from "./pages/AiCards";
 import Review from "./pages/Review";
+import Settings from "./pages/Settings";
+import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
 import AppShell from "./components/layout/AppShell";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import useTheme from "./hooks/useTheme";
 import useAuth from "./hooks/useAuth";
+import useSettings from "./hooks/useSettings";
 
 // Picks the frame around the page.
 // Logged in = app shell (sidebar + top bar).
@@ -52,6 +55,8 @@ function Layout({ theme, onToggleTheme }) {
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
+  // Keeps calm mode on for every page.
+  useSettings();
 
   return (
     <Routes>
@@ -185,6 +190,24 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Review />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
             </ProtectedRoute>
           }
         />

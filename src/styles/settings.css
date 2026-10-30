@@ -1,0 +1,128 @@
+/* SETTINGS PAGE (/settings) and CALM MODE. */
+
+.st-card {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 18px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+}
+.st-card h2,
+.st-card p {
+  margin: 0;
+}
+
+.st-action {
+  justify-self: start;
+  min-height: 48px;
+}
+
+.st-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.st-choice {
+  min-width: 64px;
+  min-height: 52px;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  cursor: pointer;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+}
+.st-choice:hover {
+  border-color: var(--accent);
+}
+.st-choice.is-picked {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.st-choice:focus-visible,
+.st-switch:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+
+.st-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  justify-self: start;
+  min-height: 52px;
+  padding: 8px 18px 8px 10px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+}
+.st-switch-dot {
+  width: 22px;
+  height: 22px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+.st-switch.is-on {
+  border-color: var(--accent);
+}
+.st-switch.is-on .st-switch-dot {
+  background: var(--accent);
+  transform: translateX(6px);
+}
+
+/* ---------- Delete my account ---------- */
+.st-delete-panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+}
+.st-delete-panel p {
+  margin: 0;
+}
+.st-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.st-delete-actions .btn {
+  min-height: 48px;
+}
+.st-danger-btn {
+  color: var(--bg);
+  background: var(--text);
+  border: 2px solid var(--text);
+}
+.st-danger-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.st-danger-btn:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+
+/* ---------- Calm mode: no moving things at all ---------- */
+:root[data-calm="on"] *,
+:root[data-calm="on"] *::before,
+:root[data-calm="on"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-calm="on"] .fc-confetti {
+  display: none;
+}
