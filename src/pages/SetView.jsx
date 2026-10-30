@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/ui/Icon";
 import { deleteSet, getSet, setSharing } from "../hooks/useSets";
 import { setCardStarred } from "../lib/starCards";
+import { downloadCardsCsv } from "../lib/exportCards";
 
 // Study modes. A mode gets a "path" when we build it.
 // "min" = the fewest cards it needs (default 1).
@@ -325,6 +326,16 @@ export default function SetView() {
 
       <section aria-label="Cards in this set">
         <h2 className="set-section-title set-cards-title">Cards</h2>
+        <div className="set-success-actions">
+          <button
+            type="button"
+            className="btn"
+            disabled={cards.length === 0}
+            onClick={() => downloadCardsCsv(set.title, cards)}
+          >
+            Download cards (CSV)
+          </button>
+        </div>
         {starError && (
           <p className="set-error" role="status">
             {starError}

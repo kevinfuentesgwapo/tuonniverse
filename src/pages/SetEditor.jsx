@@ -94,6 +94,7 @@ export default function SetEditor() {
   const [showPaste, setShowPaste] = useState(false);
   const [pasteText, setPasteText] = useState("");
   const [notice, setNotice] = useState("");
+  const [fileError, setFileError] = useState("");
   const [error, setError] = useState("");
   const [badId, setBadId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -210,6 +211,25 @@ export default function SetEditor() {
     if (e.key === "Enter" && !e.shiftKey && index === rows.length - 1) {
       e.preventDefault();
       addRow();
+    }
+  }
+
+  // Reads a CSV / TXT file into the paste box. The student then checks it
+  // and presses "Add".
+  async function onChooseFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setFileError("");
+    if (file.size > 1024 * 1024) {
+      setFileError("That file is too big (max 1 MB). Try a smaller one.");
+      return;
+    }
+    try {
+      setPasteText(await file.text());
+    } catch (err) {
+      console.error(err);
+      setFileError("We could not read that file. Please try another one.");
     }
   }
 
@@ -510,6 +530,23 @@ export default function SetEditor() {
 
         {showPaste && (
           <section className="set-panel set-paste">
+            <div className="set-field">
+              <label className="set-label" htmlFor="set-file">
+                Or choose a file <span className="muted">(CSV or TXT)</span>
+              </label>
+              <input
+                id="set-file"
+                className="set-input"
+                type="file"
+                accept=".csv,.txt,.tsv,text/csv,text/plain,text/tab-separated-values"
+                onChange={onChooseFile}
+              />
+            </div>
+            {fileError && (
+              <p className="set-error" role="alert">
+                {fileError}
+              </p>
+            )}
             <label className="set-field" htmlFor="set-paste">
               <span className="set-label">Paste your list</span>
               <textarea
@@ -524,8 +561,9 @@ export default function SetEditor() {
               />
             </label>
             <p className="muted set-hint">
-              Split each line with a dash, a colon, a comma, or a tab (from
-              Excel or Google Sheets).
+              Split each line with a dash, a colon, a comma, a semicolon, or a
+              tab (from Excel, Google Sheets or Quizlet). In Excel, use Save as
+              CSV to make a file.
             </p>
             {pasteText.trim() && (
               <p className="set-found" aria-live="polite">
