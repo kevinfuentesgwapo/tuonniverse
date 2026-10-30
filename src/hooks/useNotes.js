@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import useAuth from "./useAuth";
+import useRefreshOnFocus from "./useRefreshOnFocus";
 
 // Turns a database row into a friendly object.
 function toNote(row) {
@@ -20,32 +21,47 @@ export default function useNotes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const reload = useCallback(async () => {
-    if (!user) {
-      setNotes([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    const { data, error: err } = await supabase
-      .from("notes")
-      .select("id, title, content, created_at, updated_at")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false });
-    if (err) {
-      console.error(err);
-      setError(err);
-      setNotes([]);
-    } else {
-      setNotes((data ?? []).map(toNote));
-    }
-    setLoading(false);
-  }, [user]);
+  // quiet = true: no "Loading" flash, and old notes stay if it fails.
+  const load = useCallback(
+    async (quiet) => {
+      if (!user) {
+        setNotes([]);
+        setLoading(false);
+        return;
+      }
+      if (!quiet) {
+        setLoading(true);
+        setError(null);
+      }
+      const { data, error: err } = await supabase
+        .from("notes")
+        .select("id, title, content, created_at, updated_at")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false });
+      if (err) {
+        console.error(err);
+        if (!quiet) {
+          setError(err);
+          setNotes([]);
+        }
+      } else {
+        setNotes((data ?? []).map(toNote));
+        setError(null);
+      }
+      if (!quiet) setLoading(false);
+    },
+    [user],
+  );
+
+  const reload = useCallback(() => load(false), [load]);
+  const quietReload = useCallback(() => load(true), [load]);
 
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // Come back to the tab: refresh quietly.
+  useRefreshOnFocus(quietReload);
 
   return { notes, loading, error, reload };
 }

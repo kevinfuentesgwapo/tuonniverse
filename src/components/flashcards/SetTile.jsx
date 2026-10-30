@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import Icon from "../ui/Icon";
 
 // One set, shown as a clickable tile. Used on Home and the Sets page.
-export default function SetTile({ set }) {
+export default function SetTile({ set, folderName = null }) {
   const count = set.cardCount;
 
   return (
@@ -17,6 +17,9 @@ export default function SetTile({ set }) {
       <span className="set-tile-meta">
         {count} {count === 1 ? "card" : "cards"}
       </span>
+      {folderName && (
+        <span className="set-tile-folder">Folder: {folderName}</span>
+      )}
     </Link>
   );
 }

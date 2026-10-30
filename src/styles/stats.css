@@ -1,0 +1,161 @@
+/* STATS PAGE (/stats). Colors only from variables. */
+
+.sx-card {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 18px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+}
+.sx-card h2,
+.sx-card p {
+  margin: 0;
+}
+.sx-start {
+  justify-self: start;
+  min-height: 48px;
+  text-decoration: none;
+}
+
+/* Top numbers */
+.sx-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.sx-tile {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+}
+.sx-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.sx-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* 14 day chart */
+.sx-chart-scroll {
+  overflow-x: auto;
+}
+.sx-chart {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(20px, 1fr));
+  gap: 4px;
+  min-width: 320px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sx-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 170px;
+}
+.sx-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.sx-bar {
+  width: 100%;
+  max-width: 28px;
+  background: var(--accent);
+  border-radius: 6px 6px 2px 2px;
+}
+.sx-bar.is-zero {
+  background: var(--border);
+}
+.sx-dlabel {
+  display: grid;
+  justify-items: center;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: var(--muted);
+}
+.sx-day.is-today .sx-dlabel,
+.sx-day.is-today .sx-count {
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: underline;
+}
+.sx-note {
+  font-size: 0.85rem;
+}
+
+/* Rows with a bar (study modes, sets) */
+.sx-rows {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sx-row {
+  display: grid;
+  gap: 6px;
+}
+.sx-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.sx-row-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+  color: var(--text);
+}
+a.sx-row-name {
+  text-decoration: none;
+}
+a.sx-row-name:hover {
+  text-decoration: underline;
+}
+a.sx-row-name:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+.sx-track {
+  height: 12px;
+  overflow: hidden;
+  background: var(--border);
+  border-radius: 999px;
+}
+.sx-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+/* Text for screen readers only */
+.sx-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

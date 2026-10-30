@@ -1,0 +1,94 @@
+/* FOLDERS on the Sets page. Colors only from variables. */
+
+.sf-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+}
+.sf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sf-chip {
+  min-height: 44px;
+  padding: 8px 16px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  background: transparent;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+}
+.sf-chip:hover {
+  border-color: var(--accent);
+}
+.sf-chip[aria-pressed="true"] {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.sf-chip-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.sf-chip:focus-visible,
+.sf-add:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+.sf-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.sf-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 14px;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+}
+.sf-form {
+  display: grid;
+  gap: 10px;
+}
+.sf-form p {
+  margin: 0;
+}
+.sf-panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.sf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sf-actions .btn {
+  min-height: 44px;
+}
+.sf-message {
+  min-height: 1.4em;
+  margin: 0 0 8px;
+}
+
+/* Small folder name on a set tile (only on the "All" view) */
+.set-tile-folder {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}

@@ -18,6 +18,7 @@ import NoteEditor from "./pages/NoteEditor";
 import AiCards from "./pages/AiCards";
 import Review from "./pages/Review";
 import Settings from "./pages/Settings";
+import Stats from "./pages/Stats";
 import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/layout/Navbar";
@@ -190,6 +191,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Review />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <Stats />
             </ProtectedRoute>
           }
         />

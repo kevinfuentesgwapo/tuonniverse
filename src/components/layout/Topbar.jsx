@@ -173,6 +173,15 @@ export default function Topbar({ theme, onToggleTheme }) {
                 <span className="muted">{user?.email}</span>
               </div>
               <Link
+                to="/stats"
+                className="menu-item"
+                role="menuitem"
+                onClick={() => setOpenMenu(null)}
+              >
+                <Icon name="flame" size={18} />
+                Your stats
+              </Link>
+              <Link
                 to="/settings"
                 className="menu-item"
                 role="menuitem"

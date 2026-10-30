@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import useFolders from "../hooks/useFolders";
 import Icon from "../components/ui/Icon";
 import { createSet, getSet, updateSet } from "../hooks/useSets";
 import { parseCards } from "../lib/parseCards";
@@ -25,10 +31,11 @@ function isComplete(row) {
 }
 
 // A short text that changes when anything on the page changes.
-function makeSignature(title, description, rows) {
+function makeSignature(title, description, rows, folderId) {
   return JSON.stringify([
     title,
     description,
+    folderId,
     rows.map((row) => [row.cardId, row.term, row.definition]),
   ]);
 }
@@ -62,6 +69,7 @@ export default function SetEditor() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { id: setId } = useParams(); // only exists on /sets/:id/edit
+  const [searchParams] = useSearchParams(); // /sets/new?folder=ID starts in that folder
   const isEdit = Boolean(setId);
 
   const [status, setStatus] = useState(isEdit ? "loading" : "ready"); // loading | ready | missing | error
@@ -71,6 +79,15 @@ export default function SetEditor() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [folderId, setFolderId] = useState(() =>
+    isEdit ? "" : searchParams.get("folder") || "",
+  );
+  const {
+    folders,
+    loading: foldersLoading,
+    error: foldersError,
+  } = useFolders();
+  const foldersReady = !foldersLoading && !foldersError;
   const [rows, setRows] = useState(() =>
     Array.from({ length: isEdit ? 1 : START_ROWS }, () => newRow()),
   );
@@ -84,7 +101,7 @@ export default function SetEditor() {
 
   const parsed = useMemo(() => parseCards(pasteText), [pasteText]);
   const readyCount = rows.filter(isComplete).length;
-  const signature = makeSignature(title, description, rows);
+  const signature = makeSignature(title, description, rows, folderId);
   const dirty = isEdit
     ? status === "ready" && baseline !== null && signature !== baseline
     : Boolean(
@@ -120,9 +137,15 @@ export default function SetEditor() {
         );
         setTitle(result.set.title);
         setDescription(loadedDescription);
+        setFolderId(result.set.folder_id || "");
         setRows(loadedRows);
         setBaseline(
-          makeSignature(result.set.title, loadedDescription, loadedRows),
+          makeSignature(
+            result.set.title,
+            loadedDescription,
+            loadedRows,
+            result.set.folder_id || "",
+          ),
         );
         setStatus("ready");
       })
@@ -135,6 +158,13 @@ export default function SetEditor() {
       cancelled = true;
     };
   }, [isEdit, setId, reloadKey]);
+
+  // If the chosen folder does not exist (any more), fall back to "No folder".
+  useEffect(() => {
+    if (foldersReady && folderId && !folders.some((f) => f.id === folderId)) {
+      setFolderId("");
+    }
+  }, [foldersReady, folders, folderId]);
 
   // Warn before leaving the page with unsaved work.
   useEffect(() => {
@@ -269,6 +299,8 @@ export default function SetEditor() {
           userId: user.id,
           title: cleanTitle,
           description: description.trim(),
+          // If folders did not load, leave the set's folder alone.
+          folderId: foldersReady ? folderId || null : undefined,
           removedIds,
           changed,
           added,
@@ -286,6 +318,7 @@ export default function SetEditor() {
         title: cleanTitle,
         description: description.trim(),
         cards: cleaned,
+        folderId: foldersReady ? folderId || null : null,
       });
       setSaved({ title: cleanTitle, count: cleaned.length });
       window.scrollTo(0, 0);
@@ -441,6 +474,26 @@ export default function SetEditor() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </label>
+          {folders.length > 0 && (
+            <label className="set-field" htmlFor="set-folder">
+              <span className="set-label">
+                Folder <span className="muted">(optional)</span>
+              </span>
+              <select
+                id="set-folder"
+                className="set-input"
+                value={folderId}
+                onChange={(e) => setFolderId(e.target.value)}
+              >
+                <option value="">No folder</option>
+                {folders.map((folder) => (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </section>
 
         <div className="set-tools">

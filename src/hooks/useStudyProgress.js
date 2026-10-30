@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 import useAuth from "./useAuth";
+import useRefreshOnFocus from "./useRefreshOnFocus";
 
 // Turns a date into "2026-10-28" using the student's own clock.
 function dayKey(date) {
@@ -16,6 +17,8 @@ function dayKey(date) {
 export default function useStudyProgress(refreshKey) {
   const { user } = useAuth();
   const userId = user?.id;
+  const [focusTick, setFocusTick] = useState(0);
+  const loadedRef = useRef(false); // true after one good load
   const [state, setState] = useState({
     loading: true,
     error: false,
@@ -37,8 +40,11 @@ export default function useStudyProgress(refreshKey) {
       if (cancelled) return;
       if (error) {
         console.error(error);
+        // A failed background refresh keeps the numbers already on screen.
+        if (loadedRef.current) return;
         setState({ loading: false, error: true, sessions: [] });
       } else {
+        loadedRef.current = true;
         setState({ loading: false, error: false, sessions: data });
       }
     }
@@ -47,7 +53,10 @@ export default function useStudyProgress(refreshKey) {
     return () => {
       cancelled = true;
     };
-  }, [userId, refreshKey]);
+  }, [userId, refreshKey, focusTick]);
+
+  // Back on the tab or the phone app: load again quietly.
+  useRefreshOnFocus(() => setFocusTick((t) => t + 1));
 
   const { sessions } = state;
 

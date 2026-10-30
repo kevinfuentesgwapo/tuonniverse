@@ -12,6 +12,7 @@ const TABLES = [
   ["study_sessions", "user_id"],
   ["cards", "user_id"],
   ["sets", "user_id"],
+  ["folders", "user_id"],
   ["notes", "user_id"],
   ["ai_usage", "user_id"],
   ["user_settings", "user_id"],

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import useAuth from "./useAuth";
+import useRefreshOnFocus from "./useRefreshOnFocus";
 
 // ---------- Your list of sets (with how many cards each has) ----------
 export default function useSets() {
@@ -10,36 +11,45 @@ export default function useSets() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
-    if (!userId) return;
-    const { data, error: loadError } = await supabase
-      .from("sets")
-      .select("id, title, description, created_at, cards(count)")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+  // quiet = a refresh in the background: if it fails, keep what is on screen.
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!userId) return;
+      const { data, error: loadError } = await supabase
+        .from("sets")
+        .select("id, title, description, created_at, folder_id, cards(count)")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
-    if (loadError) {
-      console.error(loadError);
-      setError("We could not load your sets.");
-      setSets([]);
-    } else {
-      setError("");
-      setSets(
-        data.map((row) => ({
-          id: row.id,
-          title: row.title,
-          description: row.description,
-          createdAt: row.created_at,
-          cardCount: row.cards?.[0]?.count ?? 0,
-        })),
-      );
-    }
-    setLoading(false);
-  }, [userId]);
+      if (loadError) {
+        console.error(loadError);
+        if (quiet) return;
+        setError("We could not load your sets.");
+        setSets([]);
+      } else {
+        setError("");
+        setSets(
+          data.map((row) => ({
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            createdAt: row.created_at,
+            folderId: row.folder_id ?? null,
+            cardCount: row.cards?.[0]?.count ?? 0,
+          })),
+        );
+      }
+      setLoading(false);
+    },
+    [userId],
+  );
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Back on the tab or the phone app: load again quietly.
+  useRefreshOnFocus(() => load(true));
 
   function reload() {
     setLoading(true);
@@ -53,13 +63,20 @@ export default function useSets() {
 
 // ---------- Save a new set and all its cards ----------
 // If the cards fail to save, the empty set is removed again.
-export async function createSet({ userId, title, description, cards }) {
+export async function createSet({
+  userId,
+  title,
+  description,
+  cards,
+  folderId = null,
+}) {
   const { data: set, error: setError } = await supabase
     .from("sets")
     .insert({
       user_id: userId,
       title,
       description: description || null,
+      folder_id: folderId || null,
     })
     .select("id")
     .single();
@@ -89,7 +106,7 @@ export async function createSet({ userId, title, description, cards }) {
 export async function getSet(id) {
   const { data: set, error: setError } = await supabase
     .from("sets")
-    .select("id, title, description, created_at, share_code")
+    .select("id, title, description, created_at, share_code, folder_id")
     .eq("id", id)
     .maybeSingle();
 
@@ -114,12 +131,14 @@ export async function getSet(id) {
 // removedIds: ids of cards to delete.
 // changed: existing cards that changed [{ id, term, definition, position }].
 // added: brand new cards [{ term, definition, position }].
+// folderId: the folder id, or null for "No folder". Leave it out to keep the folder as it is.
 // Stars are never touched, so starred cards stay starred.
 export async function updateSet({
   setId,
   userId,
   title,
   description,
+  folderId,
   removedIds = [],
   changed = [],
   added = [],
@@ -130,6 +149,7 @@ export async function updateSet({
     .update({
       title,
       description: description || null,
+      ...(folderId !== undefined ? { folder_id: folderId } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("id", setId)

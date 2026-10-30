@@ -4,7 +4,7 @@ import Icon from "../components/ui/Icon";
 
 // Your public contact email. Shown on the page.
 const CONTACT_EMAIL = "tuoniverse@gmail.com";
-const LAST_UPDATED = "October 29, 2026";
+const LAST_UPDATED = "October 30, 2026";
 
 // Three happy promises shown at the top.
 const PROMISES = [
@@ -61,10 +61,15 @@ export default function Privacy() {
         <h2>What we keep</h2>
         <ul>
           <li>
-            Your name, email, and profile picture from Google or Facebook, or
-            the email you sign up with.
+            Your name, email, and profile picture from Google, Discord, or
+            Facebook, or the email you sign up with.
           </li>
           <li>The sets, cards, and notes you make.</li>
+          <li>
+            Your study history (which rounds you did and when) and how well you
+            know each card.
+          </li>
+          <li>Your settings, like your daily goal and calm mode.</li>
           <li>
             How many AI requests you use each day (to keep it fair and free).
           </li>
@@ -111,20 +116,31 @@ export default function Privacy() {
       <section className="privacy-card" id="delete-data">
         <h2>Delete your data</h2>
         <p>
-          You can ask us to delete your account and everything in it: your
-          profile, sets, cards, and notes.
+          You can delete your account and everything in it yourself, any time.
+          It takes about a minute:
         </p>
         <ol>
           <li>
-            Send an email to{" "}
-            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+            Log in and open <Link to="/settings">Settings</Link>.
           </li>
           <li>
-            Write &quot;Delete my Tuoniverse data&quot; and use the same email
-            you log in with.
+            Press &quot;Delete my account&quot; and type DELETE to confirm.
           </li>
-          <li>We will delete your data and reply to say it is done.</li>
+          <li>
+            We remove your profile, sets, cards, notes, study history, and your
+            login. This cannot be undone.
+          </li>
         </ol>
+        <p>
+          Want a copy first? Settings also has &quot;Download my data&quot;. It
+          saves a file with your sets, cards, notes, and study history.
+        </p>
+        <p className="muted">
+          Cannot log in? Email{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> from the same
+          email you log in with and write &quot;Delete my Tuoniverse data&quot;.
+          We will delete it by hand and reply.
+        </p>
         <p className="muted">
           If you logged in with Facebook, you can also remove Tuoniverse in your
           Facebook settings under Apps and Websites. Then email us to delete the

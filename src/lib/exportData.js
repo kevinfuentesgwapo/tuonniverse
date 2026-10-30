@@ -1,33 +1,16 @@
 import { supabase } from "./supabase";
+import { fetchAll } from "./fetchAll";
 import { loadSettings } from "./userSettings";
-
-const PAGE = 1000; // Supabase gives at most 1000 rows at a time
-
-// Reads ALL your rows from one table, a page at a time.
-async function fetchAll(table, columns, userId, orderColumn) {
-  const rows = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase
-      .from(table)
-      .select(columns)
-      .eq("user_id", userId)
-      .order(orderColumn, { ascending: true })
-      .range(from, from + PAGE - 1);
-    if (error) throw error;
-    rows.push(...data);
-    if (data.length < PAGE) break;
-  }
-  return rows;
-}
 
 // Collects everything that belongs to you. Cards sit inside their set.
 export async function exportMyData(user) {
   const userId = user.id;
-  const [sets, cards, notes, sessions, progress, settings, profile] =
+  const [folders, sets, cards, notes, sessions, progress, settings, profile] =
     await Promise.all([
+      fetchAll("folders", "id, name, created_at", userId, "id"),
       fetchAll(
         "sets",
-        "id, title, description, share_code, created_at, updated_at",
+        "id, title, description, share_code, folder_id, created_at, updated_at",
         userId,
         "id",
       ),
@@ -76,6 +59,7 @@ export async function exportMyData(user) {
       daily_goal: settings.dailyGoal,
       calm_mode: settings.calmMode,
     },
+    folders,
     sets: sets.map((set) => ({
       ...set,
       cards: cards

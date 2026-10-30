@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import useAuth from "./useAuth";
+import useRefreshOnFocus from "./useRefreshOnFocus";
 import { loadReviewQueue } from "../lib/cardProgress";
 
 // How many cards are due today, and how many new ones are waiting.
@@ -35,6 +36,9 @@ export default function useDueToday() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Come back to the tab: refresh quietly (old numbers stay if it fails).
+  useRefreshOnFocus(load);
 
   return state;
 }
