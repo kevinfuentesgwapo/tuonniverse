@@ -22,7 +22,13 @@ function shuffleOrder(length) {
 // Flip cards. Space = flip. Left and right arrows = back and next. S = star.
 // onFinish(cardsDone) is called ONE time per round, when the last card is done.
 // onToggleStar(cardId, starred) saves a star. It may throw.
-export default function FlipCards({ cards, onFinish, onToggleStar }) {
+// canStar={false} hides the star button and the S key (used for shared sets).
+export default function FlipCards({
+  cards,
+  onFinish,
+  onToggleStar,
+  canStar = true,
+}) {
   const total = cards.length;
   const [order, setOrder] = useState(() => inOrder(total));
   const [index, setIndex] = useState(0);
@@ -94,7 +100,7 @@ export default function FlipCards({ cards, onFinish, onToggleStar }) {
         e.preventDefault();
         goBack();
       } else if (e.key === "s" || e.key === "S") {
-        if (done) return;
+        if (done || !canStar) return;
         e.preventDefault();
         toggleStar();
       } else if (e.key === " ") {
@@ -106,7 +112,7 @@ export default function FlipCards({ cards, onFinish, onToggleStar }) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [done, goNext, goBack, flip, toggleStar]);
+  }, [done, canStar, goNext, goBack, flip, toggleStar]);
 
   // When the "all done" screen shows, move focus to "Go again"
   useEffect(() => {
@@ -251,21 +257,25 @@ export default function FlipCards({ cards, onFinish, onToggleStar }) {
             </span>
           </button>
 
-          <div className="fc-star-row">
-            <button
-              type="button"
-              className="btn fc-btn"
-              onClick={toggleStar}
-              aria-pressed={isStarred}
-            >
-              <span aria-hidden="true">{isStarred ? "★" : "☆"}</span>{" "}
-              {isStarred ? "Starred" : "Star this card"}
-            </button>
-          </div>
-          {starError && (
-            <p className="muted fc-save-note" role="status">
-              {starError}
-            </p>
+          {canStar && (
+            <>
+              <div className="fc-star-row">
+                <button
+                  type="button"
+                  className="btn fc-btn"
+                  onClick={toggleStar}
+                  aria-pressed={isStarred}
+                >
+                  <span aria-hidden="true">{isStarred ? "★" : "☆"}</span>{" "}
+                  {isStarred ? "Starred" : "Star this card"}
+                </button>
+              </div>
+              {starError && (
+                <p className="muted fc-save-note" role="status">
+                  {starError}
+                </p>
+              )}
+            </>
           )}
 
           <div className="fc-controls">
@@ -298,8 +308,8 @@ export default function FlipCards({ cards, onFinish, onToggleStar }) {
           </div>
 
           <p className="muted fc-hint">
-            Tap the card to flip it. On a keyboard: Space flips, arrow keys
-            move, S stars the card.
+            Tap the card to flip it. On a keyboard: Space flips, arrow keys move
+            {canStar ? ", S stars the card" : ""}.
           </p>
         </>
       )}

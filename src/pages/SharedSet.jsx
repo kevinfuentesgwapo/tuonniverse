@@ -123,8 +123,33 @@ export default function SharedSet() {
                 ? "Save a copy to my sets"
                 : "Log in to save a copy"}
           </button>
+          {cards.length > 0 && (
+            <Link to={`/s/${code}/flip`} className="btn">
+              Practice with flip cards
+            </Link>
+          )}
+          {cards.length > 1 && (
+            <Link to={`/s/${code}/quiz`} className="btn">
+              Practice with a quiz
+            </Link>
+          )}
+          {cards.length > 0 && (
+            <Link to={`/s/${code}/write`} className="btn">
+              Practice by writing
+            </Link>
+          )}
+          {cards.length > 1 && (
+            <Link to={`/s/${code}/match`} className="btn">
+              Practice by matching
+            </Link>
+          )}
+          {cards.length > 3 && (
+            <Link to={`/s/${code}/test`} className="btn">
+              Practice with a test
+            </Link>
+          )}
         </div>
-        <p className="muted">
+        <p className="muted shared-note">
           Your copy is yours. You can study it and change it. The original stays
           safe.
         </p>

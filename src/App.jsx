@@ -6,6 +6,11 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Goodbye from "./pages/Goodbye";
 import SharedSet from "./pages/SharedSet";
+import SharedFlip from "./pages/SharedFlip";
+import SharedQuiz from "./pages/SharedQuiz";
+import SharedWrite from "./pages/SharedWrite";
+import SharedMatch from "./pages/SharedMatch";
+import SharedTest from "./pages/SharedTest";
 import SetEditor from "./pages/SetEditor";
 import Sets from "./pages/Sets";
 import SetView from "./pages/SetView";
@@ -74,6 +79,11 @@ export default function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/goodbye" element={<Goodbye />} />
         <Route path="/s/:code" element={<SharedSet />} />
+        <Route path="/s/:code/flip" element={<SharedFlip />} />
+        <Route path="/s/:code/quiz" element={<SharedQuiz />} />
+        <Route path="/s/:code/write" element={<SharedWrite />} />
+        <Route path="/s/:code/match" element={<SharedMatch />} />
+        <Route path="/s/:code/test" element={<SharedTest />} />
 
         {/* Private pages. Logged-out visitors are sent to /login. */}
         <Route

@@ -40,7 +40,8 @@ function buildQuiz(target, pool) {
 
 // Multiple choice quiz. Keys 1 to 4 pick an answer. Right arrow = next.
 // onFinish(cardsDone) is called ONE time per round, when the round ends.
-export default function QuizMode({ cards, onFinish }) {
+// canStar={false} hides the star buttons and the S key (used for shared sets).
+export default function QuizMode({ cards, onFinish, canStar = true }) {
   const [questions, setQuestions] = useState(() => buildQuiz(cards, cards));
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState(null); // number of the chosen option
@@ -95,14 +96,18 @@ export default function QuizMode({ cards, onFinish }) {
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         goNext();
-      } else if ((e.key === "s" || e.key === "S") && picked !== null) {
+      } else if (
+        (e.key === "s" || e.key === "S") &&
+        picked !== null &&
+        canStar
+      ) {
         e.preventDefault();
         toggleStar(question.card.id);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [done, question, picked, pick, goNext, toggleStar]);
+  }, [done, canStar, question, picked, pick, goNext, toggleStar]);
 
   // After you answer, move focus to the Next button
   useEffect(() => {
@@ -247,21 +252,23 @@ export default function QuizMode({ cards, onFinish }) {
                   <li key={r.card.id}>
                     <strong>{r.card.term}</strong>
                     <span>{r.card.definition}</span>
-                    <button
-                      type="button"
-                      className="set-star"
-                      aria-pressed={isStarred(r.card.id)}
-                      aria-label={
-                        isStarred(r.card.id)
-                          ? `Unstar ${r.card.term}`
-                          : `Star ${r.card.term}`
-                      }
-                      onClick={() => toggleStar(r.card.id)}
-                    >
-                      <span aria-hidden="true">
-                        {isStarred(r.card.id) ? "★" : "☆"}
-                      </span>
-                    </button>
+                    {canStar && (
+                      <button
+                        type="button"
+                        className="set-star"
+                        aria-pressed={isStarred(r.card.id)}
+                        aria-label={
+                          isStarred(r.card.id)
+                            ? `Unstar ${r.card.term}`
+                            : `Star ${r.card.term}`
+                        }
+                        onClick={() => toggleStar(r.card.id)}
+                      >
+                        <span aria-hidden="true">
+                          {isStarred(r.card.id) ? "★" : "☆"}
+                        </span>
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -342,17 +349,19 @@ export default function QuizMode({ cards, onFinish }) {
           <div className="qz-footer">
             {picked !== null && (
               <>
-                <button
-                  type="button"
-                  className="btn fc-btn qz-star-btn"
-                  aria-pressed={isStarred(question.card.id)}
-                  onClick={() => toggleStar(question.card.id)}
-                >
-                  <span aria-hidden="true">
-                    {isStarred(question.card.id) ? "★" : "☆"}
-                  </span>{" "}
-                  {isStarred(question.card.id) ? "Starred" : "Star this card"}
-                </button>
+                {canStar && (
+                  <button
+                    type="button"
+                    className="btn fc-btn qz-star-btn"
+                    aria-pressed={isStarred(question.card.id)}
+                    onClick={() => toggleStar(question.card.id)}
+                  >
+                    <span aria-hidden="true">
+                      {isStarred(question.card.id) ? "★" : "☆"}
+                    </span>{" "}
+                    {isStarred(question.card.id) ? "Starred" : "Star this card"}
+                  </button>
+                )}
                 <button
                   type="button"
                   ref={nextRef}
@@ -373,8 +382,11 @@ export default function QuizMode({ cards, onFinish }) {
           )}
 
           <p className="muted fc-hint">
-            On a keyboard: press 1 to {question.options.length} to answer, the
-            right arrow for the next question, and S to star a card.
+            On a keyboard: press 1 to {question.options.length} to answer
+            {canStar
+              ? ", the right arrow for the next question, and S to star a card"
+              : " and the right arrow for the next question"}
+            .
           </p>
         </>
       )}

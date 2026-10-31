@@ -1,0 +1,8 @@
+/* SHARED SET PAGES (/s/:code and practice pages). */
+
+/* The line under the buttons needs room to breathe. */
+.shared-note,
+.set-view-head .shared-note,
+.set-view-head .set-success-actions + .shared-note {
+  margin-top: 16px;
+}

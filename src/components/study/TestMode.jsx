@@ -24,7 +24,8 @@ const KIND_LABEL = {
 // Test mode: a mix of question types. No answers are shown until the end.
 // Keys 1 to 4 pick an answer. Left and right arrows move between questions.
 // onFinish(cardsDone) is called ONE time per test, when it is finished.
-export default function TestMode({ cards, onFinish }) {
+// canStar={false} hides the star buttons (used for shared sets).
+export default function TestMode({ cards, onFinish, canStar = true }) {
   const [questions, setQuestions] = useState(() => buildTest(cards));
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // question number -> answer
@@ -260,21 +261,23 @@ export default function TestMode({ cards, onFinish }) {
                       Your answer: {describeAnswer(r.question, r.answer)}
                     </span>
                     <span>Right answer: {r.question.answer}</span>
-                    <button
-                      type="button"
-                      className="set-star"
-                      aria-pressed={isStarred(r.question.card.id)}
-                      aria-label={
-                        isStarred(r.question.card.id)
-                          ? `Unstar ${r.question.card.term}`
-                          : `Star ${r.question.card.term}`
-                      }
-                      onClick={() => toggleStar(r.question.card.id)}
-                    >
-                      <span aria-hidden="true">
-                        {isStarred(r.question.card.id) ? "★" : "☆"}
-                      </span>
-                    </button>
+                    {canStar && (
+                      <button
+                        type="button"
+                        className="set-star"
+                        aria-pressed={isStarred(r.question.card.id)}
+                        aria-label={
+                          isStarred(r.question.card.id)
+                            ? `Unstar ${r.question.card.term}`
+                            : `Star ${r.question.card.term}`
+                        }
+                        onClick={() => toggleStar(r.question.card.id)}
+                      >
+                        <span aria-hidden="true">
+                          {isStarred(r.question.card.id) ? "★" : "☆"}
+                        </span>
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

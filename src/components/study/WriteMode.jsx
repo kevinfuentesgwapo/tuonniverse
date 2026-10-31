@@ -63,7 +63,8 @@ function grade(typed, answer) {
 
 // Write mode. Enter checks the answer. Shift+Enter makes a new line.
 // onFinish(cardsDone) is called ONE time per round, when the round ends.
-export default function WriteMode({ cards, onFinish }) {
+// canStar={false} hides the star buttons and the S key (used for shared sets).
+export default function WriteMode({ cards, onFinish, canStar = true }) {
   const [questions, setQuestions] = useState(() => shuffle(cards));
   const [index, setIndex] = useState(0);
   const [typed, setTyped] = useState("");
@@ -97,7 +98,7 @@ export default function WriteMode({ cards, onFinish }) {
 
   // Press S to star the card. Only after checking, so typing is not affected.
   useEffect(() => {
-    if (!checked || done || !card) return;
+    if (!checked || done || !card || !canStar) return;
     function onKey(e) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const tag = e.target.tagName;
@@ -109,7 +110,7 @@ export default function WriteMode({ cards, onFinish }) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [checked, done, card, toggleStar]);
+  }, [checked, done, card, canStar, toggleStar]);
 
   // When the "all done" screen shows, move focus to "Try again"
   useEffect(() => {
@@ -283,21 +284,23 @@ export default function WriteMode({ cards, onFinish }) {
                   <li key={r.card.id}>
                     <strong>{r.card.term}</strong>
                     <span>{r.card.definition}</span>
-                    <button
-                      type="button"
-                      className="set-star"
-                      aria-pressed={isStarred(r.card.id)}
-                      aria-label={
-                        isStarred(r.card.id)
-                          ? `Unstar ${r.card.term}`
-                          : `Star ${r.card.term}`
-                      }
-                      onClick={() => toggleStar(r.card.id)}
-                    >
-                      <span aria-hidden="true">
-                        {isStarred(r.card.id) ? "★" : "☆"}
-                      </span>
-                    </button>
+                    {canStar && (
+                      <button
+                        type="button"
+                        className="set-star"
+                        aria-pressed={isStarred(r.card.id)}
+                        aria-label={
+                          isStarred(r.card.id)
+                            ? `Unstar ${r.card.term}`
+                            : `Star ${r.card.term}`
+                        }
+                        onClick={() => toggleStar(r.card.id)}
+                      >
+                        <span aria-hidden="true">
+                          {isStarred(r.card.id) ? "★" : "☆"}
+                        </span>
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -392,17 +395,19 @@ export default function WriteMode({ cards, onFinish }) {
                       I was right
                     </button>
                   )}
-                  <button
-                    type="button"
-                    className="btn fc-btn"
-                    aria-pressed={isStarred(card.id)}
-                    onClick={() => toggleStar(card.id)}
-                  >
-                    <span aria-hidden="true">
-                      {isStarred(card.id) ? "★" : "☆"}
-                    </span>{" "}
-                    {isStarred(card.id) ? "Starred" : "Star this card"}
-                  </button>
+                  {canStar && (
+                    <button
+                      type="button"
+                      className="btn fc-btn"
+                      aria-pressed={isStarred(card.id)}
+                      onClick={() => toggleStar(card.id)}
+                    >
+                      <span aria-hidden="true">
+                        {isStarred(card.id) ? "★" : "☆"}
+                      </span>{" "}
+                      {isStarred(card.id) ? "Starred" : "Star this card"}
+                    </button>
+                  )}
                 </span>
                 <button
                   type="button"
@@ -425,8 +430,8 @@ export default function WriteMode({ cards, onFinish }) {
 
           <p className="muted fc-hint">
             Capital letters and small typos are forgiven. Press Enter to check,
-            or Shift+Enter for a new line. After checking, press S to star the
-            card.
+            or Shift+Enter for a new line.
+            {canStar ? " After checking, press S to star the card." : ""}
           </p>
         </>
       )}
