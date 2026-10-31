@@ -1,5 +1,4 @@
 // POST /api/generate-cards  { text }  + header Authorization: Bearer <user token>
-import { createClient } from "@supabase/supabase-js";
 import { generateCards } from "./_lib/gemini.js";
 import {
   DAILY_LIMIT,
@@ -8,30 +7,12 @@ import {
   getUsed,
   addUse,
 } from "./_lib/limits.js";
-
-const send = (res, code, body) => res.status(code).json(body);
+import { requireUser, send } from "./_lib/auth.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST")
-    return send(res, 405, { error: "Please use POST." });
-
-  const token = (req.headers.authorization || "").replace("Bearer ", "");
-  if (!token) return send(res, 401, { error: "Please log in first." });
-
-  const url = process.env.VITE_SUPABASE_URL;
-  const anon = process.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !anon)
-    return send(res, 500, { error: "Server is not set up yet." });
-
-  // Act as the logged-in user, so RLS still protects the data.
-  const db = createClient(url, anon, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-    auth: { persistSession: false },
-  });
-
-  const { data: auth } = await db.auth.getUser(token);
-  const user = auth?.user;
-  if (!user) return send(res, 401, { error: "Please log in again." });
+  const session = await requireUser(req, res);
+  if (!session) return;
+  const { db, user } = session;
 
   const text = String(req.body?.text || "").trim();
   if (text.length < MIN_CHARS) {
