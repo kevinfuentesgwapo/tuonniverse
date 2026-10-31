@@ -446,22 +446,22 @@ function LoggedInHome({ user }) {
                 <span>{quest.text}</span>
                 {!quest.done && quest.id === "ai" && (
                   <Link to="/ai" className="home-go">
-                    Start
+                    Try AI cards
                   </Link>
                 )}
                 {!quest.done && quest.id === "set" && (
                   <Link to="/sets/new" className="home-go">
-                    Start
+                    Make a set
                   </Link>
                 )}
                 {!quest.done && quest.id === "note" && (
                   <Link to="/notes/new" className="home-go">
-                    Start
+                    Write a note
                   </Link>
                 )}
                 {!quest.done && quest.id === "study" && (
                   <Link to="/sets" className="home-go">
-                    Start
+                    Pick a set
                   </Link>
                 )}
               </li>
