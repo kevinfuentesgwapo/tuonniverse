@@ -2,10 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { loadSearchItems } from "../lib/loadSearchItems";
-import { searchItems } from "../lib/searchItems";
+import {
+  resultPath,
+  resultSubtitle,
+  resultTag,
+  searchItems,
+} from "../lib/searchItems";
 
 const NEWEST = 5; // newest sets and notes shown before you type
-const MAX_RESULTS = 30;
+const MAX_RESULTS = 30; // for each group
 
 function ResultGroup({ title, list }) {
   if (list.length === 0) return null;
@@ -15,19 +20,12 @@ function ResultGroup({ title, list }) {
       <ul className="sp-list">
         {list.map((item) => (
           <li key={`${item.type}-${item.id}`}>
-            <Link
-              to={
-                item.type === "set" ? `/sets/${item.id}` : `/notes/${item.id}`
-              }
-              className="sp-item"
-            >
-              <span className="search-tag">
-                {item.type === "set" ? "Set" : "Note"}
-              </span>
+            <Link to={resultPath(item)} className="sp-item">
+              <span className="search-tag">{resultTag(item)}</span>
               <span className="search-text">
                 <span className="search-title">{item.title}</span>
-                {item.description && (
-                  <span className="search-sub">{item.description}</span>
+                {resultSubtitle(item) && (
+                  <span className="search-sub">{resultSubtitle(item)}</span>
                 )}
               </span>
             </Link>
@@ -86,9 +84,18 @@ export default function SearchPage() {
   }
 
   const hasQuery = query.trim() !== "";
-  const found = hasQuery ? searchItems(items, query).slice(0, MAX_RESULTS) : [];
-  const foundSets = found.filter((item) => item.type === "set");
-  const foundNotes = found.filter((item) => item.type === "note");
+  const found = hasQuery ? searchItems(items, query) : [];
+  const ofType = (type) =>
+    found.filter((item) => item.type === type).slice(0, MAX_RESULTS);
+  const foundSets = ofType("set");
+  const foundFolders = ofType("folder");
+  const foundNotes = ofType("note");
+  const foundCards = ofType("card");
+  const shown =
+    foundSets.length +
+    foundFolders.length +
+    foundNotes.length +
+    foundCards.length;
   const newestSets = items
     .filter((item) => item.type === "set")
     .slice(0, NEWEST);
@@ -134,7 +141,7 @@ export default function SearchPage() {
         <ResultGroup title="Notes" list={newestNotes} />
       </>
     );
-  } else if (found.length === 0) {
+  } else if (shown === 0) {
     body = (
       <div className="sp-empty">
         <p>No match for “{query.trim()}”. Try another word.</p>
@@ -152,7 +159,9 @@ export default function SearchPage() {
     body = (
       <>
         <ResultGroup title="Sets" list={foundSets} />
+        <ResultGroup title="Folders" list={foundFolders} />
         <ResultGroup title="Notes" list={foundNotes} />
+        <ResultGroup title="Cards" list={foundCards} />
       </>
     );
   }
@@ -161,12 +170,12 @@ export default function SearchPage() {
     <main className="set-view">
       <header className="set-view-head">
         <h1>Search</h1>
-        <p className="muted">Find your sets and notes.</p>
+        <p className="muted">Find your sets, folders, notes and cards.</p>
       </header>
 
       <form role="search" onSubmit={onSubmit}>
         <label className="sp-label" htmlFor="search-page-input">
-          Search your sets and notes
+          Search your sets, folders, notes and cards
         </label>
         <input
           id="search-page-input"
@@ -182,9 +191,7 @@ export default function SearchPage() {
       </form>
 
       <p className="sp-count" role="status" aria-live="polite">
-        {status === "ready" && hasQuery && found.length > 0
-          ? `${found.length} found`
-          : ""}
+        {status === "ready" && hasQuery && shown > 0 ? `${shown} found` : ""}
       </p>
 
       <div className="sp-body">{body}</div>

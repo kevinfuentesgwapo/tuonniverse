@@ -2,13 +2,18 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "../ui/Icon";
 import useAuth from "../../hooks/useAuth";
-import { supabase } from "../../lib/supabase";
-import { searchItems } from "../../lib/searchItems";
+import { loadSearchItems } from "../../lib/loadSearchItems";
+import {
+  resultPath,
+  resultSubtitle,
+  resultTag,
+  searchItems,
+} from "../../lib/searchItems";
 
 const STALE_MS = 30000; // look again if the list is older than 30 seconds
 const PER_GROUP = 5;
 
-// The search box in the top bar. Finds your own sets and notes.
+// The search box in the top bar. Finds your own sets, notes and cards.
 // Press "/" to jump here. Arrow keys + Enter to open a result. Esc to close.
 export default function SearchBox() {
   const { user } = useAuth();
@@ -24,32 +29,12 @@ export default function SearchBox() {
   const [items, setItems] = useState([]);
   const [status, setStatus] = useState("idle"); // idle | loading | ready | error
 
-  // Loads your sets and notes (titles only). Runs when you click the box.
+  // Loads your sets, notes and cards. Runs when you click the box.
   const load = useCallback(async () => {
     if (!userId) return;
     setStatus((old) => (old === "ready" ? old : "loading"));
     try {
-      const [setsResult, notesResult] = await Promise.all([
-        supabase
-          .from("sets")
-          .select("id, title, description")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(500),
-        supabase
-          .from("notes")
-          .select("id, title")
-          .eq("user_id", userId)
-          .order("updated_at", { ascending: false })
-          .limit(500),
-      ]);
-      if (setsResult.error) throw setsResult.error;
-      if (notesResult.error) throw notesResult.error;
-
-      setItems([
-        ...setsResult.data.map((row) => ({ ...row, type: "set" })),
-        ...notesResult.data.map((row) => ({ ...row, type: "note" })),
-      ]);
+      setItems(await loadSearchItems(userId));
       loadedAt.current = Date.now();
       setStatus("ready");
     } catch (err) {
@@ -91,11 +76,22 @@ export default function SearchBox() {
   const noteResults = found
     .filter((item) => item.type === "note")
     .slice(0, PER_GROUP);
-  const flat = [...setResults, ...noteResults];
+  const cardResults = found
+    .filter((item) => item.type === "card")
+    .slice(0, PER_GROUP);
+  const folderResults = found
+    .filter((item) => item.type === "folder")
+    .slice(0, PER_GROUP);
+  const flat = [
+    ...setResults,
+    ...folderResults,
+    ...noteResults,
+    ...cardResults,
+  ];
   const activeIndex = Math.min(active, Math.max(flat.length - 1, 0));
 
   function go(item) {
-    navigate(item.type === "set" ? `/sets/${item.id}` : `/notes/${item.id}`);
+    navigate(resultPath(item));
     setOpen(false);
     setQuery("");
     inputRef.current?.blur();
@@ -136,13 +132,11 @@ export default function SearchBox() {
         onMouseEnter={() => setActive(index)}
         onClick={() => go(item)}
       >
-        <span className="search-tag">
-          {item.type === "set" ? "Set" : "Note"}
-        </span>
+        <span className="search-tag">{resultTag(item)}</span>
         <span className="search-text">
           <span className="search-title">{item.title}</span>
-          {item.description && (
-            <span className="search-sub">{item.description}</span>
+          {resultSubtitle(item) && (
+            <span className="search-sub">{resultSubtitle(item)}</span>
           )}
         </span>
       </li>
@@ -151,7 +145,11 @@ export default function SearchBox() {
 
   let body;
   if (!hasQuery) {
-    body = <p className="search-hint">Type to search your sets and notes.</p>;
+    body = (
+      <p className="search-hint">
+        Type to search your sets, folders, notes and cards.
+      </p>
+    );
   } else if (status === "error") {
     body = (
       <div className="search-empty">
@@ -199,13 +197,32 @@ export default function SearchBox() {
           </li>
         )}
         {setResults.map((item, i) => renderOption(item, i))}
+        {folderResults.length > 0 && (
+          <li role="presentation" className="search-group">
+            Folders
+          </li>
+        )}
+        {folderResults.map((item, i) =>
+          renderOption(item, setResults.length + i),
+        )}
         {noteResults.length > 0 && (
           <li role="presentation" className="search-group">
             Notes
           </li>
         )}
         {noteResults.map((item, i) =>
-          renderOption(item, setResults.length + i),
+          renderOption(item, setResults.length + folderResults.length + i),
+        )}
+        {cardResults.length > 0 && (
+          <li role="presentation" className="search-group">
+            Cards
+          </li>
+        )}
+        {cardResults.map((item, i) =>
+          renderOption(
+            item,
+            setResults.length + folderResults.length + noteResults.length + i,
+          ),
         )}
       </ul>
     );
@@ -220,7 +237,7 @@ export default function SearchBox() {
         ref={inputRef}
         type="search"
         role="combobox"
-        aria-label="Search your sets and notes"
+        aria-label="Search your sets, folders, notes and cards"
         aria-expanded={showList}
         aria-controls={showList ? listId : undefined}
         aria-activedescendant={
@@ -228,7 +245,7 @@ export default function SearchBox() {
         }
         aria-autocomplete="list"
         autoComplete="off"
-        placeholder="Search your sets and notes"
+        placeholder="Search sets, notes and cards"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);

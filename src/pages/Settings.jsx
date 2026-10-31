@@ -75,8 +75,9 @@ export default function Settings() {
       } catch (err) {
         console.error(err);
       }
-      // A fresh start: the page loads again with nobody logged in.
-      window.location.replace("/");
+      // A fresh start: the page loads again with nobody logged in,
+      // and shows a friendly goodbye.
+      window.location.replace("/goodbye");
     } catch (err) {
       console.error(err);
       setDelError(err.message);

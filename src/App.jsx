@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Goodbye from "./pages/Goodbye";
 import SharedSet from "./pages/SharedSet";
 import SetEditor from "./pages/SetEditor";
 import Sets from "./pages/Sets";
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/goodbye" element={<Goodbye />} />
         <Route path="/s/:code" element={<SharedSet />} />
 
         {/* Private pages. Logged-out visitors are sent to /login. */}

@@ -62,6 +62,11 @@ svg {
   .shell-content {
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
+  /* The footer sits after the page, so it needs its own room above the
+     tab bar. Otherwise Privacy, Terms and Contact hide behind it. */
+  .site-footer {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
   /* The Save bars on set and note pages sit above the tab bar */
   .set-savebar {
     bottom: calc(84px + env(safe-area-inset-bottom));

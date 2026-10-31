@@ -85,7 +85,7 @@ export default function Topbar({ theme, onToggleTheme }) {
         <Link
           to="/search"
           className="theme-btn topbar-search-btn"
-          aria-label="Search your sets and notes"
+          aria-label="Search your sets, folders, notes and cards"
           title="Search"
         >
           <Icon name="search" size={20} />
@@ -95,6 +95,7 @@ export default function Topbar({ theme, onToggleTheme }) {
           <button
             type="button"
             className="btn btn-primary create-btn"
+            aria-label="Create"
             onClick={() => toggle("create")}
             aria-haspopup="menu"
             aria-expanded={openMenu === "create"}
