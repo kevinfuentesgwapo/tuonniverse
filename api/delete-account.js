@@ -1,5 +1,6 @@
 // POST /api/delete-account  { confirm: "DELETE" }  + header Authorization: Bearer <user token>
-// Deletes ALL of the logged-in student's data, then their login.
+// Deletes ALL of the logged-in student's data (also their picture files,
+// unless another card still uses a picture), then their login.
 // Needs the secret env variable SUPABASE_SERVICE_ROLE_KEY (set in Vercel only).
 import { createClient } from "@supabase/supabase-js";
 
@@ -18,6 +19,48 @@ const TABLES = [
   ["user_settings", "user_id"],
   ["profiles", "id"],
 ];
+
+// Picture files live in the public bucket "card-images" as <user id>/<name>.
+const PICTURE_BUCKET = "card-images";
+
+// Every picture file in this student's own folder.
+async function listMyPictures(admin, userId) {
+  const PAGE = 100;
+  const paths = [];
+  for (let offset = 0; offset < 5000; offset += PAGE) {
+    const { data, error } = await admin.storage
+      .from(PICTURE_BUCKET)
+      .list(userId, { limit: PAGE, offset });
+    if (error) throw new Error(`pictures: ${error.message}`);
+    for (const file of data) paths.push(`${userId}/${file.name}`);
+    if (data.length < PAGE) break;
+  }
+  return paths;
+}
+
+// Deletes the files that NO card uses anymore. Run it AFTER this student's
+// cards are gone. A saved copy of a shared set may still use a picture,
+// and that picture must stay for the other person.
+async function deleteUnusedPictures(admin, paths) {
+  const CHUNK = 100;
+  const free = [];
+  for (let i = 0; i < paths.length; i += CHUNK) {
+    const chunk = paths.slice(i, i + CHUNK);
+    const { data, error } = await admin
+      .from("cards")
+      .select("image_path")
+      .in("image_path", chunk);
+    if (error) throw new Error(`pictures: ${error.message}`);
+    const used = new Set((data || []).map((row) => row.image_path));
+    free.push(...chunk.filter((path) => !used.has(path)));
+  }
+  for (let i = 0; i < free.length; i += CHUNK) {
+    const { error } = await admin.storage
+      .from(PICTURE_BUCKET)
+      .remove(free.slice(i, i + CHUNK));
+    if (error) throw new Error(`pictures: ${error.message}`);
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST")
@@ -51,10 +94,17 @@ export default async function handler(req, res) {
   });
 
   try {
+    // Find the picture files first, while we still know who they belong to.
+    const pictures = await listMyPictures(admin, user.id);
+
     for (const [table, column] of TABLES) {
       const { error } = await admin.from(table).delete().eq(column, user.id);
       if (error) throw new Error(`${table}: ${error.message}`);
     }
+
+    // Now that my cards are gone, remove the files nobody else uses.
+    await deleteUnusedPictures(admin, pictures);
+
     const { error } = await admin.auth.admin.deleteUser(user.id);
     if (error) throw new Error(`login: ${error.message}`);
 

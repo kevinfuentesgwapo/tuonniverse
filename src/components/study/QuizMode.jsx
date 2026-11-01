@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import useCardStars from "../../hooks/useCardStars";
+import CardPicture from "./CardPicture";
 
 // Confetti bits for the "all done" screen. Fixed values, nothing random.
 const BITS = Array.from({ length: 16 }, (_, i) => ({
@@ -300,6 +301,7 @@ export default function QuizMode({ cards, onFinish, canStar = true }) {
           <div className="qz-card">
             <span className="fc-tag">Which definition matches this term?</span>
             <h2 className="qz-term">{question.term}</h2>
+            <CardPicture path={question.card.image_path} />
           </div>
 
           <div

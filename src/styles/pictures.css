@@ -1,0 +1,49 @@
+/* PICTURES ON CARDS (set editor). Colors only from variables. */
+
+.pic-term-col {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.pic-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.pic-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+}
+.pic-btn {
+  min-height: 44px;
+}
+
+/* The picture that goes with a term, in the study modes. */
+.cpic {
+  display: block;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  max-height: 240px;
+  margin: 8px auto 0;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.cpic-flip {
+  max-height: 150px;
+  margin: 0 auto;
+}
+.cpic-tile {
+  max-height: 72px;
+  margin: 0 auto 6px;
+}
+/* A small picture under the term in a card list (set page, shared page). */
+.cpic-list {
+  max-height: 72px;
+  margin: 8px 0 0;
+}

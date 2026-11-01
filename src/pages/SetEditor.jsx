@@ -10,6 +10,16 @@ import useFolders from "../hooks/useFolders";
 import Icon from "../components/ui/Icon";
 import { createSet, getSet, updateSet } from "../hooks/useSets";
 import { parseCards } from "../lib/parseCards";
+import {
+  MAX_PICTURES,
+  PictureError,
+  PictureLimitError,
+  cardImageUrl,
+  countMyPictures,
+  removeCardImages,
+  shrinkImage,
+  uploadCardImage,
+} from "../lib/cardImages";
 
 const MAX_CARDS = 500;
 const START_ROWS = 3;
@@ -17,10 +27,25 @@ const CONFETTI_COUNT = 28;
 
 // Each row gets its own id, so React keeps the right inputs when we delete.
 // cardId = the real card in the database (null for a brand new card).
+// image = null (no picture)
+//       | { kind: "existing", path }   a picture that is already saved
+//       | { kind: "new", token, blob, type, ext, previewUrl }   chosen, saved on "Save"
 let rowCounter = 0;
-function newRow(term = "", definition = "", cardId = null) {
+let pictureCounter = 0;
+function newRow(term = "", definition = "", cardId = null, imagePath = null) {
   rowCounter += 1;
-  return { id: rowCounter, cardId, term, definition };
+  return {
+    id: rowCounter,
+    cardId,
+    term,
+    definition,
+    image: imagePath ? { kind: "existing", path: imagePath } : null,
+  };
+}
+
+function imageKey(image) {
+  if (!image) return "";
+  return image.kind === "new" ? `new-${image.token}` : image.path;
 }
 
 function isFilled(row) {
@@ -36,7 +61,12 @@ function makeSignature(title, description, rows, folderId) {
     title,
     description,
     folderId,
-    rows.map((row) => [row.cardId, row.term, row.definition]),
+    rows.map((row) => [
+      row.cardId,
+      row.term,
+      row.definition,
+      imageKey(row.image),
+    ]),
   ]);
 }
 
@@ -75,7 +105,10 @@ export default function SetEditor() {
   const [status, setStatus] = useState(isEdit ? "loading" : "ready"); // loading | ready | missing | error
   const [reloadKey, setReloadKey] = useState(0);
   const [baseline, setBaseline] = useState(null);
-  const originalRef = useRef(new Map()); // cardId -> { term, definition, position }
+  const originalRef = useRef(new Map()); // cardId -> { term, definition, position, imagePath }
+  const fileRef = useRef(null); // the hidden picture chooser
+  const pickRowRef = useRef(null); // which card row asked for a picture
+  const previewUrlsRef = useRef(new Set()); // preview addresses we must free
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -122,7 +155,7 @@ export default function SetEditor() {
         }
         const loadedRows = result.cards.length
           ? result.cards.map((card) =>
-              newRow(card.term, card.definition, card.id),
+              newRow(card.term, card.definition, card.id, card.image_path),
             )
           : [newRow()];
         const loadedDescription = result.set.description || "";
@@ -133,6 +166,7 @@ export default function SetEditor() {
               term: card.term,
               definition: card.definition,
               position: card.position,
+              imagePath: card.image_path || null,
             },
           ]),
         );
@@ -167,6 +201,15 @@ export default function SetEditor() {
     }
   }, [foldersReady, folders, folderId]);
 
+  // Free the small picture previews when we leave the page.
+  useEffect(() => {
+    const urls = previewUrlsRef.current;
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.clear();
+    };
+  }, []);
+
   // Warn before leaving the page with unsaved work.
   useEffect(() => {
     if (!dirty) return undefined;
@@ -200,10 +243,75 @@ export default function SetEditor() {
     focusField(row.id, "term");
   }
 
+  function dropPreview(image) {
+    if (image?.kind === "new") {
+      URL.revokeObjectURL(image.previewUrl);
+      previewUrlsRef.current.delete(image.previewUrl);
+    }
+  }
+
   function removeRow(rowId) {
+    dropPreview(rows.find((row) => row.id === rowId)?.image);
     setRows((list) =>
       list.length === 1 ? [newRow()] : list.filter((row) => row.id !== rowId),
     );
+  }
+
+  // ---------- Pictures ----------
+  function choosePicture(rowId) {
+    pickRowRef.current = rowId;
+    fileRef.current?.click();
+  }
+
+  // The picture is made small right away, but it is only uploaded on Save.
+  async function onPictureFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const rowId = pickRowRef.current;
+    if (!file || rowId === null) return;
+    setError("");
+    setNotice("");
+    try {
+      const small = await shrinkImage(file);
+      const previewUrl = URL.createObjectURL(small.blob);
+      previewUrlsRef.current.add(previewUrl);
+      dropPreview(rows.find((row) => row.id === rowId)?.image);
+      pictureCounter += 1;
+      const token = pictureCounter;
+      setRows((list) =>
+        list.map((row) =>
+          row.id === rowId
+            ? {
+                ...row,
+                image: {
+                  kind: "new",
+                  token,
+                  blob: small.blob,
+                  type: small.type,
+                  ext: small.ext,
+                  previewUrl,
+                },
+              }
+            : row,
+        ),
+      );
+      setNotice("Picture ready. It is saved when you press Save.");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof PictureError
+          ? err.message
+          : "We could not use that picture. Please try another one.",
+      );
+    }
+  }
+
+  function removePicture(rowId) {
+    dropPreview(rows.find((row) => row.id === rowId)?.image);
+    setRows((list) =>
+      list.map((row) => (row.id === rowId ? { ...row, image: null } : row)),
+    );
+    setNotice("");
   }
 
   // Enter in the last definition adds a new card. Shift+Enter = new line.
@@ -283,26 +391,54 @@ export default function SetEditor() {
 
     setSaving(true);
     setError("");
+    const uploaded = []; // new picture files, to clean up if saving fails
     try {
+      // 1. Upload the new pictures first. Only now (on Save), so nothing is
+      //    left behind in storage when someone leaves without saving.
+      const newPictureRows = complete.filter(
+        (row) => row.image?.kind === "new",
+      );
+      if (newPictureRows.length > 0) {
+        const have = await countMyPictures(user.id);
+        if (have !== null && have + newPictureRows.length > MAX_PICTURES) {
+          throw new PictureLimitError();
+        }
+      }
+      const pathByRow = new Map();
+      for (const row of newPictureRows) {
+        const path = await uploadCardImage(user.id, row.image);
+        uploaded.push(path);
+        pathByRow.set(row.id, path);
+      }
+      const pictureOf = (row) => {
+        if (row.image?.kind === "new") return pathByRow.get(row.id) || null;
+        return row.image?.path || null;
+      };
+
       if (isEdit) {
         // Work out what changed, so we only send the changes.
         const keptIds = new Set();
         const changed = [];
         const added = [];
+        const finalByCard = new Map(); // cardId -> picture path (or null)
         complete.forEach((row, position) => {
+          const imagePath = pictureOf(row);
           const card = {
             term: row.term.trim(),
             definition: row.definition.trim(),
             position,
+            imagePath,
           };
           if (row.cardId) {
             keptIds.add(row.cardId);
+            finalByCard.set(row.cardId, imagePath);
             const old = originalRef.current.get(row.cardId);
             if (
               !old ||
               old.term !== card.term ||
               old.definition !== card.definition ||
-              old.position !== position
+              old.position !== position ||
+              (old.imagePath || null) !== imagePath
             ) {
               changed.push({ id: row.cardId, ...card });
             }
@@ -325,6 +461,17 @@ export default function SetEditor() {
           changed,
           added,
         });
+
+        // Old picture files that no card of mine uses any more. The database
+        // keeps any file that another card (maybe in a copy) still uses.
+        const stale = [];
+        for (const [cardId, old] of originalRef.current) {
+          if (old.imagePath && finalByCard.get(cardId) !== old.imagePath) {
+            stale.push(old.imagePath);
+          }
+        }
+        await removeCardImages(stale);
+
         navigate(`/sets/${setId}`, { state: { saved: true } });
         return;
       }
@@ -332,6 +479,7 @@ export default function SetEditor() {
       const cleaned = complete.map((row) => ({
         term: row.term.trim(),
         definition: row.definition.trim(),
+        imagePath: pictureOf(row),
       }));
       await createSet({
         userId: user.id,
@@ -344,17 +492,27 @@ export default function SetEditor() {
       window.scrollTo(0, 0);
     } catch (err) {
       console.error(err);
-      setError(
-        isEdit
-          ? "We could not save your changes. Check your internet and try again. Your edits are still here."
-          : "We could not save your set. Check your internet and try again. Your cards are still here.",
-      );
+      // Saving failed: take back the files we just uploaded.
+      await removeCardImages(uploaded);
+      if (err instanceof PictureLimitError) {
+        setError(
+          `You have reached the limit of ${MAX_PICTURES} pictures. Remove a picture you do not need (or remove it from a card and save), then try again. Your edits are still here.`,
+        );
+      } else {
+        setError(
+          isEdit
+            ? "We could not save your changes. Check your internet and try again. Your edits are still here."
+            : "We could not save your set. Check your internet and try again. Your cards are still here.",
+        );
+      }
     } finally {
       setSaving(false);
     }
   }
 
   function startAnother() {
+    previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    previewUrlsRef.current.clear();
     setTitle("");
     setDescription("");
     setRows(Array.from({ length: START_ROWS }, () => newRow()));
@@ -467,6 +625,13 @@ export default function SetEditor() {
       </header>
 
       <form onSubmit={handleSave} noValidate>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          hidden
+          onChange={onPictureFile}
+        />
         <section className="set-panel">
           <label className="set-field" htmlFor="set-title">
             <span className="set-label">Title</span>
@@ -598,18 +763,64 @@ export default function SetEditor() {
                 {index + 1}
               </span>
               <div className="set-row-fields">
-                <label className="set-field" htmlFor={`term-${row.id}`}>
-                  <span className="set-label">Term</span>
-                  <input
-                    id={`term-${row.id}`}
-                    className="set-input"
-                    type="text"
-                    value={row.term}
-                    maxLength={500}
-                    placeholder="Word or question"
-                    onChange={(e) => updateRow(row.id, "term", e.target.value)}
-                  />
-                </label>
+                <div className="pic-term-col">
+                  <label className="set-field" htmlFor={`term-${row.id}`}>
+                    <span className="set-label">Term</span>
+                    <input
+                      id={`term-${row.id}`}
+                      className="set-input"
+                      type="text"
+                      value={row.term}
+                      maxLength={500}
+                      placeholder="Word or question"
+                      onChange={(e) =>
+                        updateRow(row.id, "term", e.target.value)
+                      }
+                    />
+                  </label>
+                  <div className="pic-row">
+                    {row.image ? (
+                      <>
+                        <img
+                          className="pic-thumb"
+                          src={
+                            row.image.kind === "new"
+                              ? row.image.previewUrl
+                              : cardImageUrl(row.image.path)
+                          }
+                          alt={`Picture for card ${index + 1}`}
+                          width="72"
+                          height="72"
+                        />
+                        <button
+                          type="button"
+                          className="btn pic-btn"
+                          aria-label={`Change the picture on card ${index + 1}`}
+                          onClick={() => choosePicture(row.id)}
+                        >
+                          Change picture
+                        </button>
+                        <button
+                          type="button"
+                          className="btn pic-btn"
+                          aria-label={`Remove the picture from card ${index + 1}`}
+                          onClick={() => removePicture(row.id)}
+                        >
+                          Remove picture
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn pic-btn"
+                        aria-label={`Add a picture to card ${index + 1}`}
+                        onClick={() => choosePicture(row.id)}
+                      >
+                        Add a picture
+                      </button>
+                    )}
+                  </div>
+                </div>
                 <label className="set-field" htmlFor={`def-${row.id}`}>
                   <span className="set-label">Definition</span>
                   <textarea
@@ -645,6 +856,10 @@ export default function SetEditor() {
         </button>
         <p className="muted set-hint">
           Tip: press Enter in the last definition to add the next card.
+        </p>
+        <p className="muted set-hint">
+          Each card can have one picture. We make it small first. Pictures are
+          saved when you press Save, and you can keep up to {MAX_PICTURES}.
         </p>
 
         <div className="set-savebar">

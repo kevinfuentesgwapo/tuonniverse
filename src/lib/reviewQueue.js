@@ -7,7 +7,7 @@ import { isDue } from "./spacedRepetition.js";
 export const NEW_PER_SESSION = 10;
 export const SESSION_MAX = 30;
 
-// cards:    [{ id, set_id, term, definition, position }]
+// cards:    [{ id, set_id, term, definition, position, image_path }]
 // progress: [{ card_id, due_on, reps, interval_days, ease, lapses }]
 // sets:     [{ id, title }]
 // Returns { queue, dueTotal, newTotal }
@@ -46,6 +46,7 @@ export function buildQueue({
       term: c.term,
       definition: c.definition,
       position: c.position ?? 0,
+      imagePath: c.image_path || null, // the picture that goes with the term
       progress: p
         ? {
             reps: p.reps,

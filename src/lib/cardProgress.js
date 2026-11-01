@@ -20,12 +20,17 @@ async function fetchAll(makeQuery) {
 }
 
 // Today's review list for one student.
+// setId (optional): only cards from that one set. Empty = all sets.
 // Returns { queue, dueTotal, newTotal, totalCards, nextDue } (see reviewQueue.js).
 // We find the student's sets first, then the cards inside them. That does not
 // depend on every card having its own user_id filled in.
-export async function loadReviewQueue(userId, today = localToday()) {
+export async function loadReviewQueue(
+  userId,
+  today = localToday(),
+  setId = null,
+) {
   try {
-    const [sets, progress] = await Promise.all([
+    const [allSets, progress] = await Promise.all([
       fetchAll(() =>
         supabase
           .from("sets")
@@ -42,13 +47,15 @@ export async function loadReviewQueue(userId, today = localToday()) {
       ),
     ]);
 
+    const sets = setId ? allSets.filter((set) => set.id === setId) : allSets;
+
     const cards = [];
     for (let i = 0; i < sets.length; i += SET_CHUNK) {
       const ids = sets.slice(i, i + SET_CHUNK).map((set) => set.id);
       const part = await fetchAll(() =>
         supabase
           .from("cards")
-          .select("id,set_id,term,definition,position")
+          .select("id,set_id,term,definition,position,image_path")
           .in("set_id", ids)
           .order("id"),
       );

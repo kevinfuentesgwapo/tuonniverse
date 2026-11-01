@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import useCardStars from "../../hooks/useCardStars";
+import CardPicture from "./CardPicture";
 import {
   buildTest,
   describeAnswer,
@@ -300,6 +301,7 @@ export default function TestMode({ cards, onFinish, canStar = true }) {
           <div className="qz-card">
             <span className="fc-tag">{KIND_LABEL[question.kind]}</span>
             <h2 className="qz-term">{question.card.term}</h2>
+            <CardPicture path={question.card.image_path} />
             {question.kind === "tf" && (
               <>
                 <span className="fc-tag">Is this the right definition?</span>

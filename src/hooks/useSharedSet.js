@@ -39,6 +39,7 @@ export default function useSharedSet(code) {
         id: `shared-${index}`,
         term: card.term,
         definition: card.definition,
+        image_path: card.image_path || null,
         starred: false,
       })),
     [shared],

@@ -4,6 +4,7 @@ import Icon from "../components/ui/Icon";
 import { deleteSet, getSet, setSharing } from "../hooks/useSets";
 import { setCardStarred } from "../lib/starCards";
 import { downloadCardsCsv } from "../lib/exportCards";
+import CardPicture from "../components/study/CardPicture";
 
 // Study modes. A mode gets a "path" when we build it.
 // "min" = the fewest cards it needs (default 1).
@@ -350,7 +351,14 @@ export default function SetView() {
                 <span className="set-row-num" aria-hidden="true">
                   {index + 1}
                 </span>
-                <strong className="set-term-word">{card.term}</strong>
+                <strong className="set-term-word">
+                  {card.term}
+                  <CardPicture
+                    path={card.image_path}
+                    className="cpic-list"
+                    alt=""
+                  />
+                </strong>
                 <span className="set-term-def">{card.definition}</span>
                 <button
                   type="button"

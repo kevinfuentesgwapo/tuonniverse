@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import CardPicture from "../study/CardPicture";
 
 // Confetti bits for the "all done" screen. Fixed values, nothing random.
 const BITS = Array.from({ length: 16 }, (_, i) => ({
@@ -248,6 +249,7 @@ export default function FlipCards({
             <span className="fc-inner">
               <span className="fc-face fc-front" aria-hidden={flipped}>
                 <span className="fc-tag">Term</span>
+                <CardPicture path={card.image_path} className="cpic-flip" />
                 <span className="fc-text">{card.term}</span>
               </span>
               <span className="fc-face fc-back" aria-hidden={!flipped}>

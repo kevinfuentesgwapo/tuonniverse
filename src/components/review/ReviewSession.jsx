@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import CardPicture from "../study/CardPicture";
 import { saveProgress } from "../../lib/cardProgress";
 import { saveStudySession } from "../../lib/studySessions";
 
@@ -204,6 +205,7 @@ export default function ReviewSession({ queue, userId, hasMore, onMore }) {
           <span className="fc-face fc-front">
             <span className="fc-tag">Term</span>
             <span className="fc-text">{item.term}</span>
+            <CardPicture path={item.imagePath} className="cpic-flip" alt="" />
           </span>
           <span className="fc-face fc-back">
             <span className="fc-tag">Definition</span>

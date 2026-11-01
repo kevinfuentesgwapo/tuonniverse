@@ -23,8 +23,10 @@
   min-height: 64px; /* big tap target */
   padding: 12px;
   display: flex;
+  flex-direction: column; /* picture on top, word under it */
   align-items: center;
   justify-content: center;
+  gap: 8px;
   text-align: center;
   font: inherit;
   font-size: 1rem;

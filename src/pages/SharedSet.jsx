@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { copySharedSet, getSharedSet } from "../lib/sharedSets";
+import CardPicture from "../components/study/CardPicture";
 
 // A set a friend shared with a link: /s/:code
 // Anyone can look. Saving a copy needs a login.
@@ -171,7 +172,14 @@ export default function SharedSet() {
                 <span className="set-row-num" aria-hidden="true">
                   {index + 1}
                 </span>
-                <strong className="set-term-word">{card.term}</strong>
+                <strong className="set-term-word">
+                  {card.term}
+                  <CardPicture
+                    path={card.image_path}
+                    className="cpic-list"
+                    alt=""
+                  />
+                </strong>
                 <span className="set-term-def">{card.definition}</span>
               </li>
             ))}

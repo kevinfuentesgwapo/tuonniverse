@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { removeCardImages } from "../lib/cardImages";
 import useAuth from "./useAuth";
 import useRefreshOnFocus from "./useRefreshOnFocus";
 
@@ -89,6 +90,7 @@ export async function createSet({
     term: card.term,
     definition: card.definition,
     position: index,
+    image_path: card.imagePath || null,
   }));
 
   const { error: cardsError } = await supabase.from("cards").insert(rows);
@@ -117,7 +119,7 @@ export async function getSet(id) {
 
   const { data: cards, error: cardsError } = await supabase
     .from("cards")
-    .select("id, term, definition, starred, position")
+    .select("id, term, definition, starred, position, image_path")
     .eq("set_id", id)
     .order("position", { ascending: true });
 
@@ -129,8 +131,10 @@ export async function getSet(id) {
 // ---------- Save changes to a set ----------
 // title, description: the new text for the set.
 // removedIds: ids of cards to delete.
-// changed: existing cards that changed [{ id, term, definition, position }].
-// added: brand new cards [{ term, definition, position }].
+// changed: existing cards that changed [{ id, term, definition, position, imagePath }].
+// added: brand new cards [{ term, definition, position, imagePath }].
+// imagePath: the picture place (or null). If NO card in a group has an imagePath
+// key, the pictures in that group are left alone.
 // folderId: the folder id, or null for "No folder". Leave it out to keep the folder as it is.
 // Stars are never touched, so starred cards stay starred.
 export async function updateSet({
@@ -173,6 +177,7 @@ export async function updateSet({
 
   // 3. Change existing cards in one go.
   if (changed.length > 0) {
+    const withImages = changed.some((card) => card.imagePath !== undefined);
     const rows = changed.map((card) => ({
       id: card.id,
       set_id: setId,
@@ -180,6 +185,7 @@ export async function updateSet({
       term: card.term,
       definition: card.definition,
       position: card.position,
+      ...(withImages ? { image_path: card.imagePath ?? null } : {}),
     }));
     const { error: changeError } = await supabase
       .from("cards")
@@ -189,20 +195,32 @@ export async function updateSet({
 
   // 4. Add new cards.
   if (added.length > 0) {
+    const withImages = added.some((card) => card.imagePath !== undefined);
     const rows = added.map((card) => ({
       set_id: setId,
       user_id: userId,
       term: card.term,
       definition: card.definition,
       position: card.position,
+      ...(withImages ? { image_path: card.imagePath ?? null } : {}),
     }));
     const { error: addError } = await supabase.from("cards").insert(rows);
     if (addError) throw addError;
   }
 }
 
-// ---------- Delete a set and its cards ----------
+// ---------- Delete a set and its cards (and their picture files) ----------
 export async function deleteSet(id) {
+  // Remember the picture places first. After the cards are gone we cannot see
+  // them anymore. If this fails we still delete the set: a leftover file is
+  // better than a set that cannot be deleted.
+  const { data: pictureRows, error: pictureError } = await supabase
+    .from("cards")
+    .select("image_path")
+    .eq("set_id", id)
+    .not("image_path", "is", null);
+  if (pictureError) console.error(pictureError);
+
   const { error: cardsError } = await supabase
     .from("cards")
     .delete()
@@ -211,6 +229,10 @@ export async function deleteSet(id) {
 
   const { error: setError } = await supabase.from("sets").delete().eq("id", id);
   if (setError) throw setError;
+
+  // Now delete the files. The database only allows it for MY files that NO
+  // card uses anymore, so a friend's saved copy keeps its picture.
+  await removeCardImages((pictureRows || []).map((row) => row.image_path));
 }
 
 // ---------- Turn sharing on or off for one set ----------

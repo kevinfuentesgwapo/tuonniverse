@@ -4,7 +4,7 @@ import Icon from "../components/ui/Icon";
 
 // Your public contact email. Shown on the page.
 const CONTACT_EMAIL = "tuoniverse@gmail.com";
-const LAST_UPDATED = "October 30, 2026";
+const LAST_UPDATED = "November 1, 2026";
 
 // Three happy promises shown at the top.
 const PROMISES = [
@@ -64,7 +64,10 @@ export default function Privacy() {
             Your name, email, and profile picture from Google, Discord, or
             Facebook, or the email you sign up with.
           </li>
-          <li>The sets, cards, and notes you make.</li>
+          <li>
+            The sets, cards, and notes you make, and the pictures you add to
+            cards.
+          </li>
           <li>
             Your study history (which rounds you did and when) and how well you
             know each card.
@@ -88,7 +91,30 @@ export default function Privacy() {
         <h2>Where it is stored</h2>
         <p>
           Your data is stored with Supabase. Only you can read your own sets,
-          cards, and notes.
+          cards, and notes. Pictures work differently, see the next part.
+        </p>
+      </section>
+
+      <section className="privacy-card" id="pictures">
+        <h2>Pictures on your cards</h2>
+        <p>
+          You can add one picture to a card. Pictures are different from the
+          rest of your stuff: anyone who has the exact picture link can see it.
+          The link is long and random, and we do not list or publish it. Please
+          do not add pictures with private things on them, like your address, an
+          ID card, or other people without asking them.
+        </p>
+        <p>
+          Your picture is made smaller in your browser before it is uploaded.
+          You can keep up to 100 pictures. If you share a set, friends who open
+          your link can see its pictures, and a copy they save uses the same
+          picture file.
+        </p>
+        <p>
+          When you remove or replace a picture, we try to delete the file,
+          unless another card still uses it. When you delete your account, we
+          delete all your pictures, except any that a friend&apos;s saved copy
+          of your shared set still uses. Those stay so their copy keeps working.
         </p>
       </section>
 
@@ -127,13 +153,14 @@ export default function Privacy() {
             Press &quot;Delete my account&quot; and type DELETE to confirm.
           </li>
           <li>
-            We remove your profile, sets, cards, notes, study history, and your
-            login. This cannot be undone.
+            We remove your profile, sets, cards, notes, pictures, study history,
+            and your login. This cannot be undone.
           </li>
         </ol>
         <p>
           Want a copy first? Settings also has &quot;Download my data&quot;. It
-          saves a file with your sets, cards, notes, and study history.
+          saves a file with your sets, cards (with links to their pictures),
+          notes, and study history.
         </p>
         <p className="muted">
           Cannot log in? Email{" "}

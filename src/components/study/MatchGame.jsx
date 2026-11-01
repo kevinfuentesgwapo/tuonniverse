@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import CardPicture from "./CardPicture";
 
 // How many pairs are in one round.
 const PAIRS = 6;
@@ -47,6 +48,7 @@ export default function MatchGame({
           key: `t-${c.id}`,
           answer: norm(c.definition),
           text: c.term,
+          image: c.image_path || null,
         })),
       ),
       defs: shuffle(
@@ -235,6 +237,7 @@ export default function MatchGame({
               aria-hidden={matched.includes(tile.key) ? "true" : undefined}
               onClick={() => pick("term", tile)}
             >
+              <CardPicture path={tile.image} className="cpic-tile" alt="" />
               {tile.text}
             </button>
           ))}

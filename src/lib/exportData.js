@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { fetchAll } from "./fetchAll";
+import { cardImageUrl } from "./cardImages";
 import { loadSettings } from "./userSettings";
 
 // Collects everything that belongs to you. Cards sit inside their set.
@@ -16,7 +17,7 @@ export async function exportMyData(user) {
       ),
       fetchAll(
         "cards",
-        "id, set_id, term, definition, position, starred, created_at",
+        "id, set_id, term, definition, position, starred, image_path, created_at",
         userId,
         "id",
       ),
@@ -65,7 +66,11 @@ export async function exportMyData(user) {
       cards: cards
         .filter((card) => card.set_id === set.id)
         .sort((a, b) => a.position - b.position)
-        .map(({ set_id, ...card }) => card),
+        .map(({ set_id, ...card }) => ({
+          ...card,
+          // The web address of the picture, so you can open or save it.
+          image_url: card.image_path ? cardImageUrl(card.image_path) : null,
+        })),
     })),
     notes,
     study_sessions: sessions,

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import useCardStars from "../../hooks/useCardStars";
+import CardPicture from "./CardPicture";
 
 // Confetti bits for the "all done" screen. Fixed values, nothing random.
 const BITS = Array.from({ length: 16 }, (_, i) => ({
@@ -332,6 +333,7 @@ export default function WriteMode({ cards, onFinish, canStar = true }) {
           <div className="qz-card">
             <span className="fc-tag">Type the definition for this term</span>
             <h2 className="qz-term">{card.term}</h2>
+            <CardPicture path={card.image_path} />
           </div>
 
           <div className="wr-field">
