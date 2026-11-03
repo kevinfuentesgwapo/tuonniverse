@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import useAuth from "../hooks/useAuth";
 import { friendlyAuthError } from "../lib/authErrors";
@@ -495,7 +495,14 @@ export default function Login() {
           By continuing, you agree to use Tuoniverse for studying and not to
           share private information.
         </p>
+        <p className="muted terms">
+          Using Google? Its screen may show a long address that ends in
+          &quot;supabase.co&quot;. That is the safe login helper we use. It only
+          shares your name, email, and profile picture with us.{" "}
+          <Link to="/privacy">Read our privacy page</Link>.
+        </p>
       </section>
     </main>
   );
 }
+  

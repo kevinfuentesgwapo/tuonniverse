@@ -4,7 +4,7 @@ import Icon from "../components/ui/Icon";
 
 // Your public contact email. Shown on the page.
 const CONTACT_EMAIL = "tuoniverse@gmail.com";
-const LAST_UPDATED = "November 1, 2026";
+const LAST_UPDATED = "November 2, 2026";
 
 // Three happy promises shown at the top.
 const PROMISES = [
@@ -106,7 +106,7 @@ export default function Privacy() {
         </p>
         <p>
           Your picture is made smaller in your browser before it is uploaded.
-          You can keep up to 100 pictures. If you share a set, friends who open
+          You can keep up to 30 pictures. If you share a set, friends who open
           your link can see its pictures, and a copy they save uses the same
           picture file.
         </p>

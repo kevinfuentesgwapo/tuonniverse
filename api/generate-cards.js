@@ -8,6 +8,7 @@ import {
   addUse,
 } from "./_lib/limits.js";
 import { requireUser, send } from "./_lib/auth.js";
+import { aiErrorMessage } from "./_lib/aiErrors.js";
 
 export default async function handler(req, res) {
   const session = await requireUser(req, res);
@@ -46,7 +47,10 @@ export default async function handler(req, res) {
   } catch (e) {
     console.error("generate-cards:", e.message);
     return send(res, 500, {
-      error: "Tuo could not make cards right now. Try again soon.",
+      error: aiErrorMessage(
+        e,
+        "Tuo could not make cards right now. Try again soon.",
+      ),
     });
   }
 }

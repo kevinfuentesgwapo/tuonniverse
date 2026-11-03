@@ -5,7 +5,7 @@ import { supabase } from "./supabase";
 // Every picture is made small in the browser BEFORE it is uploaded.
 
 export const IMAGE_BUCKET = "card-images";
-export const MAX_PICTURES = 100; // per account. Must match pictures.sql.
+export const MAX_PICTURES = 30; // per account. Must match supabase/pictures-limit.sql.
 
 const ALLOWED_INPUT = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_INPUT_BYTES = 15 * 1024 * 1024; // the file the student picks

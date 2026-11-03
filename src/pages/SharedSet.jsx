@@ -4,6 +4,9 @@ import useAuth from "../hooks/useAuth";
 import { copySharedSet, getSharedSet } from "../lib/sharedSets";
 import CardPicture from "../components/study/CardPicture";
 
+// Where reports about a shared set are sent.
+const CONTACT_EMAIL = "tuoniverse@gmail.com";
+
 // A set a friend shared with a link: /s/:code
 // Anyone can look. Saving a copy needs a login.
 export default function SharedSet() {
@@ -100,6 +103,12 @@ export default function SharedSet() {
   }
 
   const cards = shared.cards || [];
+  // An email that already has this set's link inside, so we know which one.
+  const reportLink = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+    "Report a shared set",
+  )}&body=${encodeURIComponent(
+    `I want to report this shared set: ${window.location.origin}/s/${code}\n\nWhat is the problem?\n`,
+  )}`;
 
   return (
     <main className="set-view">
@@ -186,6 +195,11 @@ export default function SharedSet() {
           </ol>
         )}
       </section>
+
+      <p className="muted">
+        See something that is not okay? <a href={reportLink}>Report this set</a>
+        .
+      </p>
     </main>
   );
 }

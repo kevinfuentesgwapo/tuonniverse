@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 // Your public contact email. Shown on the page.
 const CONTACT_EMAIL = "tuoniverse@gmail.com";
-const LAST_UPDATED = "October 29, 2026";
+const LAST_UPDATED = "November 2, 2026";
 
 export default function Terms() {
   // Always start at the top of the page.
@@ -54,13 +54,33 @@ export default function Terms() {
         <ul>
           <li>Do not put private information in your sets or notes.</li>
           <li>
-            Do not upload anything harmful, illegal, or hurtful to others.
+            Do not upload anything harmful, illegal, or hurtful to others. That
+            includes hateful, sexual, violent, or scary content.
+          </li>
+          <li>
+            Only add pictures you made or have the right to use. Do not add
+            pictures of other people without asking them.
           </li>
           <li>
             Do not try to break the app, get into other people&apos;s data, or
             use it in a way that stops others from studying.
           </li>
         </ul>
+      </section>
+
+      <section className="privacy-card">
+        <h2>Sharing and reports</h2>
+        <p>
+          When you share a set, anyone with the link can see it and its
+          pictures. Share only what you are happy for others to see.
+        </p>
+        <p>
+          See something that is not okay? Use the &quot;Report this set&quot;
+          link on the shared page, or write to{" "}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We may remove
+          a set, a picture, or a share link that breaks these rules. We may also
+          close accounts that keep breaking them.
+        </p>
       </section>
 
       <section className="privacy-card">
