@@ -4,7 +4,7 @@ import Icon from "../components/ui/Icon";
 
 // Your public contact email. Shown on the page.
 const CONTACT_EMAIL = "tuoniverse@gmail.com";
-const LAST_UPDATED = "November 2, 2026";
+const LAST_UPDATED = "November 3, 2026";
 
 // Three happy promises shown at the top.
 const PROMISES = [
@@ -118,16 +118,26 @@ export default function Privacy() {
         </p>
       </section>
 
-      <section className="privacy-card">
+      <section className="privacy-card" id="ai">
         <h2>AI features</h2>
         <p>
           When you ask AI to make cards or a summary, the text you choose is
-          sent to Google Gemini through our server. Only that text is sent.
+          sent to Google Gemini through our server. Only that text is sent. We
+          do not send your name or email with it.
         </p>
         <p>
-          When file upload arrives, your file is read inside your browser. The
-          file itself is never uploaded. Only the text from it is sent to
-          Gemini, and only when you click the button.
+          We use the free version of Google Gemini. Under Google&apos;s rules
+          for the free version, Google may keep that text and the AI&apos;s
+          answer, use them to improve its products, and people at Google may
+          read them. Google says it first removes the link to your account. So
+          please do not paste private things, like your address, passwords, ID
+          numbers, health details, or other people&apos;s private information.
+          Only paste notes you are happy for Google to see.
+        </p>
+        <p>
+          If you upload a file (.pptx, .docx, or .pdf), it is read inside your
+          browser. The file itself is never uploaded. Only the text from it is
+          sent to Gemini, and only when you click a button.
         </p>
       </section>
 
@@ -172,6 +182,16 @@ export default function Privacy() {
           If you logged in with Facebook, you can also remove Tuoniverse in your
           Facebook settings under Apps and Websites. Then email us to delete the
           data we kept.
+        </p>
+      </section>
+
+      <section className="privacy-card" id="age">
+        <h2>Age</h2>
+        <p>
+          Tuoniverse is for people aged 13 and older. If you are under 18,
+          please ask a parent or guardian before you use it, and before you use
+          the AI features. If we learn that a child under 13 has an account, we
+          may delete the account.
         </p>
       </section>
 

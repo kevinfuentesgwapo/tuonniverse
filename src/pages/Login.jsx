@@ -492,8 +492,11 @@ export default function Login() {
         )}
 
         <p className="muted terms">
-          By continuing, you agree to use Tuoniverse for studying and not to
-          share private information.
+          By continuing, you agree to our <Link to="/terms">terms of use</Link>{" "}
+          and <Link to="/privacy">privacy page</Link>, and you confirm that you
+          are 13 or older. If you are under 18, please ask a parent or guardian
+          first. Use Tuoniverse for studying, and do not share private
+          information.
         </p>
         <p className="muted terms">
           Using Google? Its screen may show a long address that ends in
@@ -505,4 +508,3 @@ export default function Login() {
     </main>
   );
 }
-  

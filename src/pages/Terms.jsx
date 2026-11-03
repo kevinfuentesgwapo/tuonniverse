@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 // Your public contact email. Shown on the page.
 const CONTACT_EMAIL = "tuoniverse@gmail.com";
-const LAST_UPDATED = "November 2, 2026";
+const LAST_UPDATED = "November 3, 2026";
 
 export default function Terms() {
   // Always start at the top of the page.
@@ -37,6 +37,15 @@ export default function Terms() {
           Tuoniverse is free to use. You can make flashcard sets, take quizzes,
           write notes, and use AI to turn your text into cards. Please use it
           for studying.
+        </p>
+      </section>
+
+      <section className="privacy-card" id="age">
+        <h2>Who can use Tuoniverse</h2>
+        <p>
+          You must be 13 or older to use Tuoniverse. If you are under 18, please
+          ask a parent, guardian, or teacher before you sign up and before you
+          use the AI features.
         </p>
       </section>
 
@@ -89,6 +98,11 @@ export default function Terms() {
           AI cards and summaries are made by a computer, and they can be wrong.
           Always check them against your own notes or book before you trust
           them.
+        </p>
+        <p>
+          The AI features send the text you paste to Google. Do not paste
+          private information. Read the AI part of our{" "}
+          <Link to="/privacy#ai">privacy page</Link> to see what that means.
         </p>
         <p>
           AI use is limited each day to keep Tuoniverse free for everyone. The

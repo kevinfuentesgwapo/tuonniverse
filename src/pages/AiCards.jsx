@@ -1,6 +1,6 @@
 // /ai : add notes (paste or upload a file), then Tuo makes flashcards or study notes.
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useAiUsage from "../hooks/useAiUsage";
 import { createSet } from "../hooks/useSets";
@@ -214,6 +214,13 @@ export default function AiCards() {
       </header>
 
       <section className="ai-paste" aria-label="Add your notes">
+        <p className="ai-note">
+          Heads up: Tuo uses Google AI. Google may keep the text you send, use
+          it to improve its products, and people at Google may read it. Please
+          do not paste private things, like your address, passwords, or other
+          people&apos;s details. <Link to="/privacy#ai">Read more</Link>
+        </p>
+
         <div className="ai-file">
           <input
             id="ai-file"
